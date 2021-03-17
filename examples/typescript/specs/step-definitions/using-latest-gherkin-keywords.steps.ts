@@ -46,6 +46,8 @@ defineFeature(feature, (test) => {
         });
     };
 
+    defineRule('When a number, a minus sign, a number, and equals is entered into the calculator, the sum should be calculated and displayed'
+
     test('Subtracting two numbers', ({ given, and, when, then }) => {
         givenIHaveEnteredXAsTheFirstOperand(given);
         andIHaveEnteredXAsTheOperator(and);

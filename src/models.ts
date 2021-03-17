@@ -41,7 +41,15 @@ export type ParsedFeature = {
     title: string;
     scenarios: ParsedScenario[];
     scenarioOutlines: ParsedScenarioOutline[];
+    rules: ParsedRule[];
     options: Options;
+    tags: string[];
+};
+
+export type ParsedRule = {
+    title: string;
+    scenarios: ParsedScenario[];
+    scenarioOutlines: ParsedScenarioOutline[];
     tags: string[];
 };
 

@@ -279,6 +279,7 @@ export function defineFeature(
     if (
         parsedFeatureWithTagFiltersApplied.scenarios.length === 0
             && parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
+            && parsedFeatureWithTagFiltersApplied.rules.length === 0
     ) {
         return;
     }

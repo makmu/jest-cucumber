@@ -76,6 +76,13 @@ export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
         parsedScenarios = parsedScenarios.concat(parsedFeature.scenarioOutlines);
     }
 
+    if (parsedFeature && parsedFeature.rules && parsedFeature.rules.length) {
+      parsedFeature.rules.forEach( (rule) => {
+        parsedScenarios = parsedScenarios.concat(rule.scenarios);
+        parsedScenarios = parsedScenarios.concat(rule.scenarioOutlines);
+      })
+    }
+
     if (parsedFeature.options && parsedFeature.options.errors === false) {
         return;
     }
