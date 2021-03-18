@@ -1,10 +1,11 @@
-import { loadFeature, defineFeature, DefineStepFunction } from '../../../../src/';
+import { loadFeature, defineRuleBasedFeature, DefineStepFunction } from '../../../../src/';
 
 import { Calculator, CalculatorOperator } from '../../src/calculator';
 
-const feature = loadFeature('./examples/typescript/specs/features/using-latest-gherkin-keywords.feature');
+const feature = loadFeature('./examples/typescript/specs/features/using-latest-gherkin-keywords.feature', {collapseRules: false});
 
-defineFeature(feature, (test) => {
+defineRuleBasedFeature(feature, (rule) => {
+
     let calculator: Calculator;
     let output: number | undefined;
 
@@ -46,34 +47,40 @@ defineFeature(feature, (test) => {
         });
     };
 
-    test('Subtracting two numbers', ({ given, and, when, then }) => {
-        givenIHaveEnteredXAsTheFirstOperand(given);
-        andIHaveEnteredXAsTheOperator(and);
-        andIHaveEnteredXAsTheSecondOperand(and);
-        whenIPressTheEnterKey(when);
-        thenTheOutputOfXShouldBeDisplayed(then);
-    });
+    rule('When a number, a minus sign, a number, and equals is entered into the calculator, the sum should be calculated and displayed', (test) => {
 
-    test('Attempting to subtract without entering a second number', ({ given, and, when, then }) => {
-        givenIHaveEnteredXAsTheFirstOperand(given);
-        andIHaveEnteredXAsTheOperator(and);
-
-        and('I have not entered a second operand', () => {
-            // Nothing to do here
+        test('Subtracting two numbers', ({ given, and, when, then }) => {
+            givenIHaveEnteredXAsTheFirstOperand(given);
+            andIHaveEnteredXAsTheOperator(and);
+            andIHaveEnteredXAsTheSecondOperand(and);
+            whenIPressTheEnterKey(when);
+            thenTheOutputOfXShouldBeDisplayed(then);
         });
 
-        whenIPressTheEnterKey(when);
+        test('Attempting to subtract without entering a second number', ({ given, and, when, then }) => {
+            givenIHaveEnteredXAsTheFirstOperand(given);
+            andIHaveEnteredXAsTheOperator(and);
 
-        then('no output should be displayed', () => {
-            expect(output).toBeFalsy();
+            and('I have not entered a second operand', () => {
+                // Nothing to do here
+            });
+
+            whenIPressTheEnterKey(when);
+
+            then('no output should be displayed', () => {
+                expect(output).toBeFalsy();
+            });
         });
+
     });
 
-    test('Division operations', ({ given, and, when, then }) => {
-        givenIHaveEnteredXAsTheFirstOperand(given);
-        andIHaveEnteredXAsTheOperator(and);
-        andIHaveEnteredXAsTheSecondOperand(and);
-        whenIPressTheEnterKey(when);
-        thenTheOutputOfXShouldBeDisplayed(then);
+    rule("When a number, a division sign, a number, and equals is entered into the calculator, the quotient should be calculated and displayed", (test) => {
+        test('Division operations', ({ given, and, when, then }) => {
+            givenIHaveEnteredXAsTheFirstOperand(given);
+            andIHaveEnteredXAsTheOperator(and);
+            andIHaveEnteredXAsTheSecondOperand(and);
+            whenIPressTheEnterKey(when);
+            thenTheOutputOfXShouldBeDisplayed(then);
+        });
     });
 });

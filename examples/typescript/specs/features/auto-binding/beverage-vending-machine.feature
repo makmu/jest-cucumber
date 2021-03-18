@@ -1,5 +1,7 @@
 Feature: Beverage vending machine
 
+  Rule: Dispense purchased beverage
+
     Scenario Outline: Purchasing a beverage
         Given the vending machine has "<beverage>" in stock
         And I have inserted the correct amount of money
