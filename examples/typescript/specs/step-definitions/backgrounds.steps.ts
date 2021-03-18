@@ -1,9 +1,9 @@
-import { loadFeature, DefineStepFunction, defineRuleBasedFeature } from '../../../../src/';
+import { loadFeature, defineFeature, DefineStepFunction } from '../../../../src/';
 import { ArcadeMachine, COIN_TYPES, CoinStatus } from '../../src/arcade-machine';
 
-const feature = loadFeature('./examples/typescript/specs/features/backgrounds.feature', {collapseRules: false});
+const feature = loadFeature('./examples/typescript/specs/features/backgrounds.feature');
 
-defineRuleBasedFeature(feature, (rule) => {
+defineFeature(feature, (test) => {
     let arcadeMachine: ArcadeMachine;
 
     beforeEach(() => {
@@ -22,56 +22,51 @@ defineRuleBasedFeature(feature, (rule) => {
         });
     };
 
-    rule('When a coin is inserted, the balance should increase by the amount of the coin', (test) => {
-        test('Successfully inserting coins', ({ given, when, then }) => {
-            givenMyMachineIsConfiguredToRequireCoins(given);
+    test('Successfully inserting coins', ({ given, when, then }) => {
+        givenMyMachineIsConfiguredToRequireCoins(given);
 
-            given('I have not inserted any coins', () => {
-                arcadeMachine.balance = 0;
-            });
+        given('I have not inserted any coins', () => {
+            arcadeMachine.balance = 0;
+        });
 
-            when('I insert one US quarter', () => {
-                arcadeMachine.insertCoin(COIN_TYPES.USQuarter);
-            });
+        when('I insert one US quarter', () => {
+            arcadeMachine.insertCoin(COIN_TYPES.USQuarter);
+        });
 
-            then(/^I should have a balance of (\d+) cents$/, (balance) => {
-                arcadeMachine.balance = balance / 100;
-            });
+        then(/^I should have a balance of (\d+) cents$/, (balance) => {
+            arcadeMachine.balance = balance / 100;
         });
     });
 
-    rule('When a coin is not recognized as valid, it should be returned', (test) => {
-        test('Inserting a Canadian coin', ({ given, when, then }) => {
-            let coinStatus: CoinStatus;
+    test('Inserting a Canadian coin', ({ given, when, then }) => {
+        let coinStatus: CoinStatus;
 
-            givenMyMachineIsConfiguredToRequireCoins(given);
+        givenMyMachineIsConfiguredToRequireCoins(given);
 
-            givenMyMachineIsConfiguredToAcceptUsQuarters(given);
+        givenMyMachineIsConfiguredToAcceptUsQuarters(given);
 
-            when('I insert a Canadian Quarter', () => {
-                coinStatus = arcadeMachine.insertCoin(COIN_TYPES.CanadianQuarter);
-            });
-
-            then('my coin should be returned', () => {
-                expect(coinStatus).toBe<CoinStatus>('CoinReturned');
-            });
+        when('I insert a Canadian Quarter', () => {
+            coinStatus = arcadeMachine.insertCoin(COIN_TYPES.CanadianQuarter);
         });
 
-        test('Inserting a badly damaged coin', ({ given, when, then }) => {
-            let coinStatus: CoinStatus;
+        then('my coin should be returned', () => {
+            expect(coinStatus).toBe<CoinStatus>('CoinReturned');
+        });
+    });
 
-            givenMyMachineIsConfiguredToRequireCoins(given);
+    test('Inserting a badly damaged coin', ({ given, when, then }) => {
+        let coinStatus: CoinStatus;
 
-            givenMyMachineIsConfiguredToAcceptUsQuarters(given);
+        givenMyMachineIsConfiguredToRequireCoins(given);
 
-            when('I insert a US Quarter that is badly damaged', () => {
-                coinStatus = arcadeMachine.insertCoin(COIN_TYPES.Unknown);
-            });
+        givenMyMachineIsConfiguredToAcceptUsQuarters(given);
 
-            then('my coin should be returned', () => {
-                expect(coinStatus).toBe<CoinStatus>('CoinReturned');
-            });
+        when('I insert a US Quarter that is badly damaged', () => {
+            coinStatus = arcadeMachine.insertCoin(COIN_TYPES.Unknown);
         });
 
-    })
+        then('my coin should be returned', () => {
+            expect(coinStatus).toBe<CoinStatus>('CoinReturned');
+        });
+    });
 });

@@ -1,4 +1,4 @@
-import { StepDefinitions, loadFeatures, autoBindStepsWithRules } from '../../../../src';
+import { StepDefinitions, loadFeatures, autoBindSteps } from '../../../../src';
 import { VendingMachine } from '../../src/vending-machine';
 
 export const vendingMachineSteps: StepDefinitions = ({ given, and, when, then }) => {
@@ -23,6 +23,6 @@ export const vendingMachineSteps: StepDefinitions = ({ given, and, when, then })
     });
 };
 
-const features = loadFeatures('./examples/typescript/specs/features/auto-binding/**/*.feature', {collapseRules: false});
+const features = loadFeatures('./examples/typescript/specs/features/auto-binding/**/*.feature');
 
-autoBindStepsWithRules(features, [ vendingMachineSteps ]);
+autoBindSteps(features, [ vendingMachineSteps ]);
