@@ -28,10 +28,10 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
     });
 };
 
-const matchAndDefineSteps = (feature: ScenarioGroup, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
-    const scenarioOutlineScenarios = feature.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
+const matchAndDefineSteps = (group: ScenarioGroup, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
+    const scenarioOutlineScenarios = group.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
 
-    const scenarios = [ ...feature.scenarios, ...scenarioOutlineScenarios ];
+    const scenarios = [ ...group.scenarios, ...scenarioOutlineScenarios ];
 
     scenarios.forEach((scenario) => {
         test(scenario.title, (options) => {
@@ -46,14 +46,14 @@ const matchAndDefineSteps = (feature: ScenarioGroup, test: DefineScenarioFunctio
                     const stepCode = generateStepCode(scenario.steps, stepIndex, false);
                     // tslint:disable-next-line:max-line-length
                     errors.push(
-                        `No matching step found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${feature.title}". Please add the following step code: \n\n${stepCode}`
+                        `No matching step found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Please add the following step code: \n\n${stepCode}`
                     );
                 } else {
                     const matchingCode = matches.map(
                         (match) => `${match.stepMatcher.toString()}\n\n${match.stepFunction.toString()}`
                     );
                     errors.push(
-                        `${matches.length} step definition matches were found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${feature.title}". Each step can only have one matching step definition. The following step definition matches were found:\n\n${matchingCode.join(
+                        `${matches.length} step definition matches were found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Each step can only have one matching step definition. The following step definition matches were found:\n\n${matchingCode.join(
                             '\n\n'
                         )}`
                     );

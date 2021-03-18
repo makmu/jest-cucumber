@@ -11,7 +11,7 @@ import {
 } from './models';
 import {
     ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps,
-    matchSteps
+    matchSteps,
 } from './validation/step-definition-validation';
 import { applyTagFilters } from './tag-filtering';
 
@@ -37,7 +37,7 @@ export type DefineRuleFunction = (
 export type DefineScenarioFunction = (
     scenarioTitle: string,
     stepsDefinitionCallback: StepsDefinitionCallbackFunction,
-    timeout?: number
+    timeout?: number,
 ) => void;
 
 export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
@@ -51,7 +51,7 @@ export type DefineStepFunction = (stepMatcher: string | RegExp, stepDefinitionCa
 
 const processScenarioTitleTemplate = (
     scenarioTitle: string,
-    parsedFeature: ScenarioGroup,
+    group: ScenarioGroup,
     options: Options,
     parsedScenario: ParsedScenario,
     parsedScenarioOutline: ParsedScenarioOutline
@@ -61,9 +61,9 @@ const processScenarioTitleTemplate = (
             return (
                 options &&
                 options.scenarioNameTemplate({
-                    featureTitle: parsedFeature.title,
+                    featureTitle: group.title,
                     scenarioTitle: scenarioTitle.toString(),
-                    featureTags: parsedFeature.tags,
+                    featureTags: group.tags,
                     scenarioTags: (parsedScenario || parsedScenarioOutline).tags
                 })
             );
@@ -125,7 +125,7 @@ const defineScenario = (
     only: boolean = false,
     skip: boolean = false,
     concurrent: boolean = false,
-    timeout: number | undefined = undefined
+    timeout: number | undefined = undefined,
 ) => {
     const testFunction = getTestFunction(parsedScenario.skippedViaTagFilter, only, skip, concurrent);
 
@@ -198,35 +198,39 @@ const createDefineScenarioFunction = (
             parsedFeature,
             options,
             parsedScenario,
-            parsedScenarioOutline
+            parsedScenarioOutline,
         );
 
         ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps(
             options,
             parsedScenario || parsedScenarioOutline,
-            scenarioFromStepDefinitions
+            scenarioFromStepDefinitions,
         );
 
         if (checkForPendingSteps(scenarioFromStepDefinitions)) {
-            xtest(
-                scenarioTitle,
-                () => {
+            xtest(scenarioTitle, () => {
                     // Nothing to do
-                },
-                undefined
-            );
+            }, undefined);
         } else if (parsedScenario) {
-            defineScenario(scenarioTitle, scenarioFromStepDefinitions, parsedScenario, only, skip, concurrent, timeout);
+                defineScenario(
+                    scenarioTitle,
+                    scenarioFromStepDefinitions,
+                    parsedScenario,
+                    only,
+                    skip,
+                    concurrent,
+                    timeout,
+                );
         } else if (parsedScenarioOutline) {
             parsedScenarioOutline.scenarios.forEach((scenario) => {
                 defineScenario(
-                    scenario.title || scenarioTitle,
+                    (scenario.title || scenarioTitle),
                     scenarioFromStepDefinitions,
                     scenario,
                     only,
                     skip,
                     concurrent,
-                    timeout
+                    timeout,
                 );
             });
         }
@@ -237,40 +241,40 @@ const createDefineScenarioFunction = (
 
 const createDefineScenarioFunctionWithAliases = (
     featureFromStepDefinitions: FeatureFromStepDefinitions,
-    parsedFeature: ScenarioGroup,
+    group: ScenarioGroup,
     options: Options
 ) => {
     const defineScenarioFunctionWithAliases = createDefineScenarioFunction(
         featureFromStepDefinitions,
-        parsedFeature,
+        group,
         options
     );
 
     (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         featureFromStepDefinitions,
-        parsedFeature,
+        group,
         options,
         true,
         false,
-        false
+        false,
     );
 
     (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
         featureFromStepDefinitions,
-        parsedFeature,
+        group,
         options,
         false,
         true,
-        false
+        false,
     );
 
     (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
         featureFromStepDefinitions,
-        parsedFeature,
+        group,
         options,
         false,
         false,
-        true
+        true,
     );
 
     return defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases;
@@ -280,7 +284,7 @@ const createDefineStepFunction = (scenarioFromStepDefinitions: ScenarioFromStepD
     return (stepMatcher: string | RegExp, stepFunction: () => any) => {
         const stepDefinition: StepFromStepDefinitions = {
             stepMatcher,
-            stepFunction
+            stepFunction,
         };
 
         scenarioFromStepDefinitions.steps.push(stepDefinition);
@@ -336,7 +340,7 @@ export function defineRuleBasedFeature(
                 (rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase()
             );
             if (matchingRules.length != 1) {
-                throw new Error(`no matching rule found for '${ruleText}'"`);
+                throw new Error(`No matching rule found for '${ruleText}'"`);
             }
 
             defineScenarioGroup(matchingRules[0], callback, featureFromFile.options);
