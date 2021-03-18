@@ -8,7 +8,7 @@ import AstBuilder from 'gherkin/dist/src/AstBuilder';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getJestCucumberConfiguration } from './configuration';
-import { ParsedFeature, ParsedScenario, ParsedStep, ParsedScenarioOutline, Options, ParsedRule } from './models';
+import { ParsedFeature, ParsedScenario, ParsedStep, ParsedScenarioOutline, Options, ScenarioGroup} from './models';
 import Dialect from 'gherkin/dist/src/Dialect';
 
 const parseDataTableRow = (astDataTableRow: any) => {
@@ -94,7 +94,7 @@ const parseRule = (astRule: any) => {
       scenarios: parseScenarios(astRule),
       scenarioOutlines: parseScenarioOutlines(astRule),
       tags: parseTags(astRule),
-    } as ParsedRule;
+    } as ScenarioGroup;
 }
 
 const parseScenarioOutlineExampleSteps = (exampleTableRow: any, scenarioSteps: ParsedStep[]) => {
