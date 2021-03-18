@@ -16,8 +16,8 @@ export class VendingMachine {
 
     public dispenseItem(itemName: string) {
         if(this.items[itemName] === 0) {
-          this.moneyReturnSlot = this.balance;
-          this.balance = 0;
+            this.moneyReturnSlot = this.balance;
+            this.balance = 0;
         }
 
         if (this.balance >= ITEM_COST && this.items[itemName] > 0) {
