@@ -8,7 +8,7 @@ import {
 } from './feature-definition-creation';
 import { generateStepCode } from './code-generation/step-generation';
 
-const globalSteps: Array<{ stepMatcher: string | RegExp; stepFunction: () => any }> = [];
+const globalSteps: Array<{ stepMatcher: string | RegExp, stepFunction: () => any }> = [];
 
 const registerStep = (stepMatcher: string | RegExp, stepFunction: () => any) => {
     globalSteps.push({ stepMatcher, stepFunction });

@@ -3,10 +3,8 @@ import {
     ScenarioFromStepDefinitions,
     FeatureFromStepDefinitions,
     StepFromStepDefinitions,
-    ParsedFeature,
-    ParsedScenario,
-    Options,
-    ParsedScenarioOutline,
+    ParsedFeature, ParsedScenario,
+    Options, ParsedScenarioOutline,
     ScenarioGroup
 } from './models';
 import {
@@ -54,23 +52,20 @@ const processScenarioTitleTemplate = (
     group: ScenarioGroup,
     options: Options,
     parsedScenario: ParsedScenario,
-    parsedScenarioOutline: ParsedScenarioOutline
+    parsedScenarioOutline: ParsedScenarioOutline,
 ) => {
     if (options && options.scenarioNameTemplate) {
         try {
-            return (
-                options &&
-                options.scenarioNameTemplate({
-                    featureTitle: group.title,
-                    scenarioTitle: scenarioTitle.toString(),
-                    featureTags: group.tags,
-                    scenarioTags: (parsedScenario || parsedScenarioOutline).tags
-                })
-            );
+            return  options && options.scenarioNameTemplate({
+                featureTitle: group.title,
+                scenarioTitle: scenarioTitle.toString(),
+                featureTags: group.tags,
+                scenarioTags: (parsedScenario || parsedScenarioOutline).tags
+            });
         } catch (err) {
             throw new Error(
                 // tslint:disable-next-line:max-line-length
-                `An error occurred while executing a scenario name template. \nTemplate:\n${options.scenarioNameTemplate}\nError:${err.message}`
+                `An error occurred while executing a scenario name template. \nTemplate:\n${options.scenarioNameTemplate}\nError:${err.message}`,
             );
         }
     }
@@ -129,28 +124,24 @@ const defineScenario = (
 ) => {
     const testFunction = getTestFunction(parsedScenario.skippedViaTagFilter, only, skip, concurrent);
 
-    testFunction(
-        scenarioTitle,
-        () => {
-            return scenarioFromStepDefinitions.steps.reduce((promiseChain, nextStep, index) => {
-                const stepArgument = parsedScenario.steps[index].stepArgument;
-                const matches = matchSteps(
-                    parsedScenario.steps[index].stepText,
-                    scenarioFromStepDefinitions.steps[index].stepMatcher
-                );
-                let matchArgs: string[] = [];
+    testFunction(scenarioTitle, () => {
+        return scenarioFromStepDefinitions.steps.reduce((promiseChain, nextStep, index) => {
+            const stepArgument = parsedScenario.steps[index].stepArgument;
+            const matches = matchSteps(
+                parsedScenario.steps[index].stepText,
+                scenarioFromStepDefinitions.steps[index].stepMatcher
+            );
+            let matchArgs: string[] = [];
 
-                if (matches && (matches as RegExpMatchArray).length) {
-                    matchArgs = (matches as RegExpMatchArray).slice(1);
-                }
+            if (matches && (matches as RegExpMatchArray).length) {
+                matchArgs = (matches as RegExpMatchArray).slice(1);
+            }
 
-                const args = [ ...matchArgs, stepArgument ];
+            const args = [ ...matchArgs, stepArgument ];
 
-                return promiseChain.then(() => nextStep.stepFunction(...args));
-            }, Promise.resolve());
-        },
-        timeout
-    );
+            return promiseChain.then(() => nextStep.stepFunction(...args));
+        }, Promise.resolve());
+    }, timeout);
 };
 
 const createDefineScenarioFunction = (
@@ -159,16 +150,16 @@ const createDefineScenarioFunction = (
     options: Options,
     only: boolean = false,
     skip: boolean = false,
-    concurrent: boolean = false
+    concurrent: boolean = false,
 ) => {
     const defineScenarioFunction: DefineScenarioFunction = (
         scenarioTitle: string,
         stepsDefinitionFunctionCallback: StepsDefinitionCallbackFunction,
-        timeout?: number
+        timeout?: number,
     ) => {
         const scenarioFromStepDefinitions: ScenarioFromStepDefinitions = {
             title: scenarioTitle,
-            steps: []
+            steps: [],
         };
 
         featureFromStepDefinitions.scenarios.push(scenarioFromStepDefinitions);
@@ -185,13 +176,11 @@ const createDefineScenarioFunction = (
             }
         });
 
-        const parsedScenario = parsedFeature.scenarios.filter(
-            (s) => s.title.toLowerCase() === scenarioTitle.toLowerCase()
-        )[0];
+        const parsedScenario = parsedFeature.scenarios
+            .filter((s) => s.title.toLowerCase() === scenarioTitle.toLowerCase())[0];
 
-        const parsedScenarioOutline = parsedFeature.scenarioOutlines.filter(
-            (s) => s.title.toLowerCase() === scenarioTitle.toLowerCase()
-        )[0];
+        const parsedScenarioOutline = parsedFeature.scenarioOutlines
+            .filter((s) => s.title.toLowerCase() === scenarioTitle.toLowerCase())[0];
 
         scenarioTitle = processScenarioTitleTemplate(
             scenarioTitle,
@@ -212,15 +201,15 @@ const createDefineScenarioFunction = (
                     // Nothing to do
             }, undefined);
         } else if (parsedScenario) {
-                defineScenario(
-                    scenarioTitle,
-                    scenarioFromStepDefinitions,
-                    parsedScenario,
-                    only,
-                    skip,
-                    concurrent,
-                    timeout,
-                );
+            defineScenario(
+                scenarioTitle,
+                scenarioFromStepDefinitions,
+                parsedScenario,
+                only,
+                skip,
+                concurrent,
+                timeout,
+            );
         } else if (parsedScenarioOutline) {
             parsedScenarioOutline.scenarios.forEach((scenario) => {
                 defineScenario(
@@ -294,18 +283,18 @@ const createDefineStepFunction = (scenarioFromStepDefinitions: ScenarioFromStepD
 const defineScenarioGroup = (
     group: ScenarioGroup,
     scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction,
-    options: Options
+    options: Options,
 ) => {
     const featureFromDefinedSteps: FeatureFromStepDefinitions = {
         title: group.title,
-        scenarios: []
+        scenarios: [],
     };
 
     const parsedFeatureWithTagFiltersApplied = applyTagFilters(group, options.tagFilter);
 
     if (
-        parsedFeatureWithTagFiltersApplied.scenarios.length === 0 &&
-        parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
+        parsedFeatureWithTagFiltersApplied.scenarios.length === 0
+            && parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
     ) {
         return;
     }
