@@ -248,7 +248,7 @@ const parseBackgrounds = (ast: any) => {
         .map((child: any) => child.background);
 };
 
-const collapseBackgroundsOfFeature = (astFeature: any) => {
+const parseAndCollapseBackgrounds = (astFeature: any) => {
     const featureBackgrounds = parseBackgrounds(astFeature);
 
     const children = collapseBackgrounds(astFeature.children, featureBackgrounds)
@@ -357,7 +357,7 @@ export const parseFeature = (featureText: string, options?: Options): ParsedFeat
         throw new Error(`Error parsing feature Gherkin: ${err.message}`);
     }
 
-    let astFeature = collapseBackgroundsOfFeature(ast.feature);
+    let astFeature = parseAndCollapseBackgrounds(ast.feature);
 
     if(options?.collapseRules) {
         astFeature = collapseRules(astFeature);
