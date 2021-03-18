@@ -72,6 +72,9 @@ defineRuleBasedFeature(feature, (rule) => {
             });
         });
 
+    });
+
+    rule("When a number, a division sign, a number, and equals is entered into the calculator, the quotient should be calculated and displayed", (test) => {
         test('Division operations', ({ given, and, when, then }) => {
             givenIHaveEnteredXAsTheFirstOperand(given);
             andIHaveEnteredXAsTheOperator(and);

@@ -13,7 +13,8 @@
     "runtimeArgs": [
         "run-script", "test",
         "--",
-        "examples/typescript/specs/step-definitions/auto-step-binding.steps.ts"
+        //"examples/typescript/specs/step-definitions/auto-step-binding.steps.ts"
+        "examples/typescript/specs/step-definitions/using-latest-gherkin-keywords.steps.ts"
     ],
 },
         {

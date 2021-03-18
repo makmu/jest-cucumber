@@ -1,7 +1,6 @@
 Feature: Using latest Gherkin keywords
 
-    Rule: When a number, a minus sign, a number, and equals is entered into the calculator, 
-          the sum should be calculated and displayed
+    Rule: When a number, a minus sign, a number, and equals is entered into the calculator, the sum should be calculated and displayed
 
         Example: Subtracting two numbers
             Given I have entered "4" as the first operand
@@ -17,8 +16,7 @@ Feature: Using latest Gherkin keywords
             When I press the equals key
             Then no output should be displayed
 
-    Rule: When a number, a division sign, a number, and equals is entered into the calculator,
-          the quotient should be calculated and displayed
+    Rule: When a number, a division sign, a number, and equals is entered into the calculator, the quotient should be calculated and displayed
 
         Scenario Template: Division operations
             Given I have entered "<firstOperand>" as the first operand

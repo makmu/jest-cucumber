@@ -320,10 +320,9 @@ export function defineRuleBasedFeature(
     describe(featureFromFile.title, () => {
         rulesDefinitionCallback((ruleText: string, callback: ScenariosDefinitionCallbackFunction) => {
 
-            const matchingRules = featureFromFile.rules.filter((rule) => rule.title.toLocaleLowerCase() === ruleText)
+            const matchingRules = featureFromFile.rules.filter((rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase())
             if(matchingRules.length != 1) {
-              // TODO: error
-              return;
+              throw new Error(`no matching rule found for '${ruleText}'"`)
             }
 
             const rule = matchingRules[0];
