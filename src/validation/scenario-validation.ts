@@ -65,7 +65,7 @@ const findScenarioFromStepDefinitions = (
 export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
     parsedFeature: ScenarioGroup,
     featureFromStepDefinitions: FeatureFromStepDefinitions,
-    options?: Options
+    options: Options
 ) => {
     const errors: string[] = [];
 
@@ -92,7 +92,7 @@ export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
                 errors,
                 parsedScenarios,
                 scenarioFromStepDefinitions.title,
-                options!.errors as ErrorOptions,
+                options.errors as ErrorOptions,
             );
         });
     }
@@ -105,7 +105,7 @@ export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
                 errors,
                 featureFromStepDefinitions && featureFromStepDefinitions.scenarios,
                 parsedScenario,
-                options!.errors as ErrorOptions,
+                options.errors as ErrorOptions,
             );
         });
     }

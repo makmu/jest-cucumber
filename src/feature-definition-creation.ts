@@ -308,7 +308,8 @@ export function defineFeature(
 
         checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
             parsedFeatureWithTagFiltersApplied,
-            featureFromDefinedSteps
+            featureFromDefinedSteps,
+            featureFromFile.options
         );
     });
 }
