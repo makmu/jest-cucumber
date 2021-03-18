@@ -240,7 +240,11 @@ const createDefineScenarioFunctionWithAliases = (
     parsedFeature: ScenarioGroup,
     options: Options
 ) => {
-    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(featureFromStepDefinitions, parsedFeature, options);
+    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(
+        featureFromStepDefinitions,
+        parsedFeature,
+        options
+    );
 
     (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         featureFromStepDefinitions,
@@ -296,14 +300,18 @@ export function defineFeature(
 
     if (
         parsedFeatureWithTagFiltersApplied.scenarios.length === 0 &&
-        parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0 
+        parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
     ) {
         return;
     }
 
     describe(featureFromFile.title, () => {
         scenariosDefinitionCallback(
-            createDefineScenarioFunctionWithAliases(featureFromDefinedSteps, parsedFeatureWithTagFiltersApplied, featureFromFile.options)
+            createDefineScenarioFunctionWithAliases(
+                featureFromDefinedSteps,
+                parsedFeatureWithTagFiltersApplied,
+                featureFromFile.options
+            )
         );
 
         checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
@@ -318,33 +326,38 @@ export function defineRuleBasedFeature(
     featureFromFile: ParsedFeature,
     rulesDefinitionCallback: RulesDefinitionCallbackFunction
 ) {
-    describe(featureFromFile.title, () => {
-        rulesDefinitionCallback((ruleText: string, callback: ScenariosDefinitionCallbackFunction) => {
+    rulesDefinitionCallback((ruleText: string, callback: ScenariosDefinitionCallbackFunction) => {
+        const matchingRules = featureFromFile.rules.filter(
+            (rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase()
+        );
+        if (matchingRules.length != 1) {
+            throw new Error(`no matching rule found for '${ruleText}'"`);
+        }
 
-            const matchingRules = featureFromFile.rules.filter((rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase())
-            if(matchingRules.length != 1) {
-              throw new Error(`no matching rule found for '${ruleText}'"`)
-            }
+        const rule = matchingRules[0];
 
-            const rule = matchingRules[0];
+        const scenarioGroupFromDefinedSteps: FeatureFromStepDefinitions = {
+            title: rule.title,
+            scenarios: []
+        };
 
-            const scenarioGroupFromDefinedSteps: FeatureFromStepDefinitions = {
-                title: rule.title,
-                scenarios: []
-            };
+        const parsedFeatureWithTagFiltersApplied = applyTagFilters(rule, featureFromFile.options.tagFilter);
 
-            const parsedFeatureWithTagFiltersApplied = applyTagFilters(rule, featureFromFile.options.tagFilter);
+        if (
+            parsedFeatureWithTagFiltersApplied.scenarios.length === 0 &&
+            parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
+        ) {
+            return;
+        }
 
-            if (
-                parsedFeatureWithTagFiltersApplied.scenarios.length === 0 &&
-                parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
-            ) {
-                return;
-            }
-
+        describe(featureFromFile.title, () => {
             describe(ruleText, () => {
                 callback(
-                    createDefineScenarioFunctionWithAliases(scenarioGroupFromDefinedSteps, parsedFeatureWithTagFiltersApplied, featureFromFile.options)
+                    createDefineScenarioFunctionWithAliases(
+                        scenarioGroupFromDefinedSteps,
+                        parsedFeatureWithTagFiltersApplied,
+                        featureFromFile.options
+                    )
                 );
             });
 
