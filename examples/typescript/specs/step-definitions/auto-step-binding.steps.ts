@@ -23,6 +23,6 @@ export const vendingMachineSteps: StepDefinitions = ({ given, and, when, then })
     });
 };
 
-const features = loadFeatures('./examples/typescript/specs/features/auto-binding/**/*.feature');
+const features = loadFeatures('./examples/typescript/specs/features/auto-binding/**/*.feature', {collapseRules: false});
 
 autoBindStepsWithRules(features, [ vendingMachineSteps ]);

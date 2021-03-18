@@ -1,7 +1,7 @@
 import { loadFeature, DefineStepFunction, defineRuleBasedFeature } from '../../../../src/';
 import { ArcadeMachine, COIN_TYPES, CoinStatus } from '../../src/arcade-machine';
 
-const feature = loadFeature('./examples/typescript/specs/features/backgrounds.feature');
+const feature = loadFeature('./examples/typescript/specs/features/backgrounds.feature', {collapseRules: false});
 
 defineRuleBasedFeature(feature, (rule) => {
     let arcadeMachine: ArcadeMachine;

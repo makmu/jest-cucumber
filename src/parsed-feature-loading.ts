@@ -275,7 +275,7 @@ const collapseRules = (astFeature: any) => {
         return [...newChildren, ...nextChild.rule.children];
       }
       else {
-        return [...newChildren, ...nextChild];
+        return [...newChildren, nextChild];
       }
     }, [])
     return {
