@@ -5,5 +5,5 @@ export {
   generateCodeFromFeature,
   generateCodeWithSeparateFunctionsFromFeature,
 } from './code-generation/generate-code-by-line-number';
-export { autoBindSteps } from './automatic-step-binding';
+export { autoBindSteps, autoBindStepsWithRules } from './automatic-step-binding';
 export { StepsDefinitionCallbackFunction as StepDefinitions } from './feature-definition-creation';
