@@ -74,24 +74,24 @@ const setScenarioSkipped = (parsedFeature: ScenarioGroup, scenario: ParsedScenar
 };
 
 export const applyTagFilters = (
-    parsedFeature: ScenarioGroup,
+    group: ScenarioGroup,
     tagFilter: string | undefined
 ) => {
     if (tagFilter === undefined) {
-        return parsedFeature;
+        return group;
     }
 
-    const scenarios = parsedFeature.scenarios.map((scenario) => setScenarioSkipped(parsedFeature, scenario, tagFilter));
-    const scenarioOutlines = parsedFeature.scenarioOutlines
+    const scenarios = group.scenarios.map((scenario) => setScenarioSkipped(group, scenario, tagFilter));
+    const scenarioOutlines = group.scenarioOutlines
         .map((scenarioOutline) => {
             return {
-                ...setScenarioSkipped(parsedFeature, scenarioOutline, tagFilter),
-                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(parsedFeature, scenario, tagFilter)),
+                ...setScenarioSkipped(group, scenarioOutline, tagFilter),
+                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(group, scenario, tagFilter)),
             };
         });
 
     return {
-        ...parsedFeature,
+        ...group,
         scenarios,
         scenarioOutlines,
     } as ParsedFeature;
