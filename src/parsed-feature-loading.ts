@@ -269,6 +269,21 @@ const collapseBackgroundsOfFeature = (astFeature: any) => {
     };
 };
 
+const collapseRules = (astFeature: any) => {
+    const children = astFeature.children.reduce((newChildren: [], nextChild:any) => {
+      if(nextChild.rule) {
+        return [...newChildren, ...nextChild.rule.children];
+      }
+      else {
+        return [...newChildren, ...nextChild];
+      }
+    }, [])
+    return {
+      ...astFeature,
+      children,
+    }
+}
+
 const translateKeywords = (astFeature: any) => {
     const languageDialect = Gherkins.dialects()[astFeature.language];
     const translationMap = createTranslationMap(languageDialect);
@@ -343,6 +358,10 @@ export const parseFeature = (featureText: string, options?: Options): ParsedFeat
     }
 
     let astFeature = collapseBackgroundsOfFeature(ast.feature);
+
+    if(options?.collapseRules) {
+        astFeature = collapseRules(astFeature);
+    }
 
     if (astFeature.language !== 'en') {
         astFeature = translateKeywords(astFeature);

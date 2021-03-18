@@ -2,7 +2,7 @@ import { loadFeature, defineRuleBasedFeature, DefineStepFunction } from '../../.
 
 import { Calculator, CalculatorOperator } from '../../src/calculator';
 
-const feature = loadFeature('./examples/typescript/specs/features/using-latest-gherkin-keywords.feature');
+const feature = loadFeature('./examples/typescript/specs/features/using-latest-gherkin-keywords.feature', {collapseRules: false});
 
 defineRuleBasedFeature(feature, (rule) => {
 

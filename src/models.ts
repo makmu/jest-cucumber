@@ -66,6 +66,7 @@ export type ErrorOptions = {
 export type Options = {
     loadRelativePath?: boolean;
     tagFilter?: string;
+    collapseRules?: boolean;
     errors?: ErrorOptions | boolean;
     scenarioNameTemplate?: (vars: ScenarioNameTemplateVars) => string;
 };
