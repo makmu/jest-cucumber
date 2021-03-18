@@ -332,7 +332,9 @@ export function defineRuleBasedFeature(
                 throw new Error(`No matching rule found for '${ruleText}'"`);
             }
 
-            defineScenarioGroup(matchingRules[0], callback, featureFromFile.options);
+            describe(ruleText, () => {
+                defineScenarioGroup(matchingRules[0], callback, featureFromFile.options);
+            })
         });
     });
 }
