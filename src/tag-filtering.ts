@@ -76,9 +76,9 @@ const setScenarioSkipped = (parsedFeature: Rule, scenario: Scenario, tagFilter: 
 export const applyTagFilters = (
     group: Rule,
     tagFilter: string | undefined
-) => {
+): Feature => {
     if (tagFilter === undefined) {
-        return group;
+        return group as Feature;
     }
 
     const scenarios = group.scenarios.map((scenario) => setScenarioSkipped(group, scenario, tagFilter));

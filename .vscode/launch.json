@@ -11,7 +11,7 @@
     "cwd": "${workspaceRoot}",
     "runtimeExecutable": "npm",
     "runtimeArgs": [
-        "run-script", "test", "--", "examples/typescript/specs/step-definitions/using-latest-gherkin-keywords.steps.ts",
+        "run-script", "test", "--", "examples/typescript/specs/step-definitions/extended-rules-auto-step-binding.steps.ts",
     ],
 }
 ,

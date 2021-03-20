@@ -9,6 +9,7 @@ import {
 } from './validation/step-definition-validation';
 import { applyTagFilters } from './tag-filtering';
 import { generateStepCode } from './code-generation/step-generation';
+import { generateScenarioCode } from './code-generation/scenario-generation';
 
 export type StepsDefinitionCallbackOptions = {
     defineStep: DefineStepFunction;
@@ -22,7 +23,7 @@ export type StepsDefinitionCallbackOptions = {
 
 export type FeatureDefinitionCallback = (defineScenario: FeatureDefinitionFunctions) => void;
 
-export type RulesDefinitionCallbackFunction = (defineRule: DefineRuleFunction) => void;
+export type RuleDefinitionCallback = (defineScenario: ScenarioDefinitionFunctionWithAliases) => void;
 
 export type DefineRuleFunction = (
     ruleTitle: string,
@@ -35,11 +36,21 @@ export type DefineScenarioFunction = (
     timeout?: number,
 ) => void;
 
-export type FeatureDefinitionFunctions = DefineScenarioFunction & {
+export type RuleDefinitionFunction = (
+    ruleTitle: string,
+    provideRuleDefinition: RuleDefinitionCallback,
+) => void;
+
+export type FeatureDefinitionFunctions = ScenarioDefinitionFunctionWithAliases & {
+    rule: RuleDefinitionFunction;
+    test: FeatureDefinitionFunctions;
+};
+
+export type ScenarioDefinitionFunctionWithAliases = DefineScenarioFunction & {
     skip: DefineScenarioFunction;
     only: DefineScenarioFunction;
     concurrent: DefineScenarioFunction;
-};
+}
 
 export type StepsDefinitionCallbackFunction = (options: StepsDefinitionCallbackOptions) => void;
 export type DefineStepFunction = (stepMatcher: string | RegExp, stepDefinitionCallback: (...args: any[]) => any) => any;
@@ -146,8 +157,49 @@ const defineScenario = (
     }, timeout);
 };
 
-const createDefineScenarioFunction = (
-    feature: Rule,
+const createRuleDefinitionFunction = (
+  feature: Feature,
+) => 
+  (ruleTitle: string,
+    provideRuleDefinition: RuleDefinitionCallback
+    ) => {
+
+      const matchingRules = feature.rules.filter( r => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase() );
+
+      if(matchingRules.length === 0) {
+        throw new Error(`No rule found in feature that matches "${ruleTitle}"`);
+      }
+
+      if(matchingRules.length > 1) {
+        throw new Error(`More than one rule found in feature that maches "${ruleTitle}"`);
+      }
+
+      const matchingRule = matchingRules[0];
+      if(matchingRule.defined) {
+        throw new Error(`Rule "${ruleTitle} defined multiple times`);
+      }
+
+      matchingRule.defined = true;
+
+      describe(ruleTitle, () =>
+        provideRuleDefinition(
+          createScenarioDefinitionFunctionWithAliases(matchingRule, feature.options)
+        )
+      );
+
+      const errors = [
+        ...matchingRule.scenarios.filter(s => !s.defined).map(s => 
+        `Scenario "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(s)}"`),
+        ...matchingRule.scenarioOutlines.filter(s => !s.defined).map(s => 
+        `Scenario outline "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(s)}"`)];
+      
+      if (errors.length > 0) {
+          throw new Error(errors.join('\n\n'));
+      }
+  }
+
+const createScenarioDefinitionFunction = (
+    scenarioGroup: Feature | Rule,
     options: Options,
     only: boolean = false,
     skip: boolean = false,
@@ -159,8 +211,8 @@ const createDefineScenarioFunction = (
         timeout?: number,
     ) => {
 
-        const matchingScenarios = feature.scenarios.filter( s => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase());
-        const matchingScenarioOutlines = feature.scenarioOutlines.filter( s => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase());
+        const matchingScenarios = scenarioGroup.scenarios.filter( s => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase());
+        const matchingScenarioOutlines = scenarioGroup.scenarioOutlines.filter( s => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase());
 
         let scenarios: Scenario[] = [];
         if( matchingScenarios.length === 0 && matchingScenarioOutlines.length === 0 ) {
@@ -174,9 +226,9 @@ const createDefineScenarioFunction = (
           scenarios = [matchingScenarios[0]];
         }
         else {
+          matchingScenarioOutlines[0].defined = true;
           scenarios = matchingScenarioOutlines[0].scenarios;
         }
-
 
         scenarios.forEach(s => s.defined = true)
 
@@ -195,7 +247,7 @@ const createDefineScenarioFunction = (
         scenarios.forEach( scenario => {
           scenarioTitle = processScenarioTitleTemplate(
               scenarioTitle,
-              feature,
+              scenarioGroup,
               options,
               scenario
           );
@@ -225,40 +277,49 @@ const createDefineScenarioFunction = (
     return defineScenarioFunction;
 };
 
-const createFeatureDefinitionFunctions = (
-    group: Rule,
+const createFeatureDefinitionFunctions = (feature: Feature, options:Options): FeatureDefinitionFunctions => {
+
+  const featureDefinitionFunctions = createScenarioDefinitionFunctionWithAliases(feature, options) as FeatureDefinitionFunctions;
+
+  featureDefinitionFunctions.rule = createRuleDefinitionFunction(feature);
+  featureDefinitionFunctions.test = featureDefinitionFunctions;
+
+  return featureDefinitionFunctions
+}
+
+const createScenarioDefinitionFunctionWithAliases = (
+    scenarioGroup: Feature | Rule,
     options: Options
-) => {
-    const featureDefinitionFunctions = createDefineScenarioFunction(
-        group,
+): ScenarioDefinitionFunctionWithAliases => {
+    const featureDefinitionFunctions = createScenarioDefinitionFunction(
+        scenarioGroup,
         options
     );
-
-    (featureDefinitionFunctions as FeatureDefinitionFunctions).only = createDefineScenarioFunction(
-        group,
+    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).only = createScenarioDefinitionFunction(
+        scenarioGroup,
         options,
         true,
         false,
         false,
     );
 
-    (featureDefinitionFunctions as FeatureDefinitionFunctions).skip = createDefineScenarioFunction(
-        group,
+    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).skip = createScenarioDefinitionFunction(
+        scenarioGroup,
         options,
         false,
         true,
         false,
     );
 
-    (featureDefinitionFunctions as FeatureDefinitionFunctions).concurrent = createDefineScenarioFunction(
-        group,
+    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).concurrent = createScenarioDefinitionFunction(
+        scenarioGroup,
         options,
         false,
         false,
         true,
     );
 
-    return featureDefinitionFunctions as FeatureDefinitionFunctions;
+    return featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases;
 };
 
 const createDefineStepFunction = (scenarios: Scenario[]) => {
@@ -307,12 +368,13 @@ const defineScenarioGroup = (
     if (
         parsedFeatureWithTagFiltersApplied.scenarios.length === 0
             && parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
+            && parsedFeatureWithTagFiltersApplied.rules.length === 0
     ) {
         return;
     }
 
     provideFeatureDefinition(
-        createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, options)
+      createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, options)
     );
 
     checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
@@ -327,25 +389,5 @@ export function defineFeature(
 ) {
     describe(featureFromFile.title, () => {
         defineScenarioGroup(featureFromFile, provideFeatureDefinition, featureFromFile.options);
-    });
-}
-
-export function defineRuleBasedFeature(
-    featureFromFile: Feature,
-    rulesDefinitionCallback: RulesDefinitionCallbackFunction
-) {
-    describe(featureFromFile.title, () => {
-        rulesDefinitionCallback((ruleText: string, callback: FeatureDefinitionCallback) => {
-            const matchingRules = featureFromFile.rules.filter(
-                (rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase()
-            );
-            if (matchingRules.length !== 1) {
-                throw new Error(`No matching rule found for '${ruleText}'"`);
-            }
-
-            describe(ruleText, () => {
-                defineScenarioGroup(matchingRules[0], callback, featureFromFile.options);
-            })
-        });
     });
 }

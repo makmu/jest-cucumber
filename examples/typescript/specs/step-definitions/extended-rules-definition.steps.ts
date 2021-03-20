@@ -1,10 +1,10 @@
-import { loadFeature, defineRuleBasedFeature } from '../../../../src';
+import { loadFeature, defineFeature} from '../../../../src';
 import { DefineStepFunction } from '../../../../src/feature-definition-creation';
 import { VendingMachine } from '../../src/vending-machine';
 
 const feature = loadFeature('./examples/typescript/specs/features/extended-rules-definition.feature', {collapseRules: false});
 
-defineRuleBasedFeature(feature, (rule) => {
+defineFeature(feature, ({rule}) => {
     let vendingMachine: VendingMachine;
 
     const myMoney = 0.50;
@@ -51,14 +51,14 @@ defineRuleBasedFeature(feature, (rule) => {
 
     rule("Dispenses items if correct amount of money is inserted", (test) => {
 
-        test('Selecting a snack', ({ given, and, when, then }) => {
+        test('Selecting a snack', ({ given, when, then }) => {
             givenTheVendingMachineHasXInStock(given);
             givenIHaveInsertedTheCorrectAmountOfMoney(given);
             whenISelectX(when);
             thenXShouldBeDespensed(then);
         });
 
-        test('Selecting a beverage', ({ given, and, when, then }) => {
+        test('Selecting a beverage', ({ given, when, then }) => {
             givenTheVendingMachineHasXInStock(given);
             givenIHaveInsertedTheCorrectAmountOfMoney(given);
             whenISelectX(when);
@@ -68,14 +68,14 @@ defineRuleBasedFeature(feature, (rule) => {
 
     rule("Returns my money if item is out of stock", (test) => {
 
-        test('Selecting a snack', ({ given, and, when, then }) => {
+        test('Selecting a snack', ({ given, when, then }) => {
             givenTheVendingMachineHasNoXInStock(given);
             givenIHaveInsertedTheCorrectAmountOfMoney(given);
             whenISelectX(when);
             thenMyMoneyShouldBeReturned(then);
         });
 
-        test('Selecting a beverage', ({ given, and, when, then }) => {
+        test('Selecting a beverage', ({ given, when, then }) => {
             givenTheVendingMachineHasNoXInStock(given);
             givenIHaveInsertedTheCorrectAmountOfMoney(given);
             whenISelectX(when);

@@ -3,8 +3,8 @@ import { matchSteps } from './validation/step-definition-validation';
 import {
     StepsDefinitionCallbackFunction,
     defineFeature,
-    defineRuleBasedFeature,
     FeatureDefinitionFunctions,
+    ScenarioDefinitionFunctionWithAliases,
 } from './feature-definition-creation';
 import { generateStepCode } from './code-generation/step-generation';
 
@@ -28,7 +28,7 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
     });
 };
 
-const matchAndDefineSteps = (group: Rule, test: FeatureDefinitionFunctions, errors: string[]) => {
+const matchAndDefineSteps = (group: Rule, test: ScenarioDefinitionFunctionWithAliases, errors: string[]) => {
     const scenarioOutlineScenarios = group.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
 
     const scenarios = [ ...group.scenarios, ...scenarioOutlineScenarios ];
@@ -69,31 +69,13 @@ export const autoBindSteps = (features: Feature[], stepDefinitions: StepsDefinit
     const errors: string[] = [];
 
     features.forEach((feature) => {
-        defineFeature(feature, (test) => {
+        defineFeature(feature, ({test, rule}) => {
             matchAndDefineSteps(feature, test, errors);
-        });
-    });
-
-    if (errors.length) {
-        throw new Error(errors.join('\n\n'));
-    }
-};
-
-export const autoBindStepsWithRules = (
-    features: Feature[],
-    stepDefinitions: StepsDefinitionCallbackFunction[],
-) => {
-    stepDefinitions.forEach(registerSteps);
-
-    const errors: string[] = [];
-
-    features.forEach((feature) => {
-        defineRuleBasedFeature(feature, (ruleDefinition) => {
-            feature.rules.forEach((rule) => {
-                ruleDefinition(rule.title, (test) => {
-                    matchAndDefineSteps(rule, test, errors);
-                });
-            });
+            feature.rules.forEach(r => {
+              rule(r.title, (test) => {
+                matchAndDefineSteps(r, test, errors)
+              })
+            })
         });
     });
 
