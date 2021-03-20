@@ -20,13 +20,13 @@ export type StepsDefinitionCallbackOptions = {
     pending: () => void;
 };
 
-export type FeatureDefinitionCallback = (defineScenario: DefineScenarioFunctionWithAliases) => void;
+export type ScenariosDefinitionCallbackFunction = (defineScenario: DefineScenarioFunctionWithAliases) => void;
 
 export type RulesDefinitionCallbackFunction = (defineRule: DefineRuleFunction) => void;
 
 export type DefineRuleFunction = (
     ruleTitle: string,
-    scenariosDefinitionCallback: FeatureDefinitionCallback,
+    scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction,
 ) => void;
 
 export type DefineScenarioFunction = (
@@ -298,7 +298,7 @@ const createDefineStepFunction = (scenarios: Scenario[]) => {
 
 const defineScenarioGroup = (
     group: Rule,
-    scenariosDefinitionCallback: FeatureDefinitionCallback,
+    scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction,
     options: Options,
 ) => {
 
@@ -323,10 +323,10 @@ const defineScenarioGroup = (
 
 export function defineFeature(
     featureFromFile: Feature,
-    defineFeatureSteps: FeatureDefinitionCallback
+    scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction
 ) {
     describe(featureFromFile.title, () => {
-        defineScenarioGroup(featureFromFile, defineFeatureSteps, featureFromFile.options);
+        defineScenarioGroup(featureFromFile, scenariosDefinitionCallback, featureFromFile.options);
     });
 }
 
@@ -335,7 +335,7 @@ export function defineRuleBasedFeature(
     rulesDefinitionCallback: RulesDefinitionCallbackFunction
 ) {
     describe(featureFromFile.title, () => {
-        rulesDefinitionCallback((ruleText: string, callback: FeatureDefinitionCallback) => {
+        rulesDefinitionCallback((ruleText: string, callback: ScenariosDefinitionCallbackFunction) => {
             const matchingRules = featureFromFile.rules.filter(
                 (rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase()
             );
