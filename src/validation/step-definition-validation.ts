@@ -1,5 +1,4 @@
-import { Scenario, ScenarioOutline, Options, Step } from '../models';
-import { generateScenarioCode } from '../code-generation/scenario-generation';
+import { Scenario, ScenarioOutline, Options } from '../models';
 import { generateStepCode } from '../code-generation/step-generation';
 
 export const matchSteps = (stepFromFeatureFile: string, stepMatcher: string | RegExp) => {
