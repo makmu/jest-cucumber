@@ -279,7 +279,7 @@ const createFeatureDefinitionFunctions = (feature: Feature, options:Options): Fe
   featureDefinitionFunctions.rule = createRuleDefinitionFunction(feature);
   featureDefinitionFunctions.test = featureDefinitionFunctions;
 
-  return featureDefinitionFunctions
+  return featureDefinitionFunctions;
 }
 
 const createScenarioDefinitionFunctionWithAliases = (
