@@ -60,10 +60,10 @@ const checkIfScenarioMatchesTagFilter = (
     return tagFilterFunction(featureAndScenarioTags);
 };
 
-const setScenarioSkipped = (parsedFeature: Feature, scenario: Scenario, tagFilter: string) => {
+const setScenarioSkipped = (feature: Feature, scenario: Scenario, tagFilter: string) => {
     const skippedViaTagFilter = !checkIfScenarioMatchesTagFilter(
         tagFilter,
-        parsedFeature,
+        feature,
         scenario,
     );
 
@@ -89,6 +89,10 @@ export const applyTagFilters = (
                 scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario, tagFilter)),
             };
         });
+    const rules = feature.rules.map((rule) => ({
+      ...rule,
+      scenarios: rule.scenarios.map(scenario => setScenarioSkipped(feature, scenario, tagFilter))
+    }) )
 
     return {
         ...feature,
