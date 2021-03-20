@@ -229,12 +229,12 @@ const createFeatureDefinitionFunctions = (
     group: Rule,
     options: Options
 ) => {
-    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(
+    const featureDefinitionFunctions = createDefineScenarioFunction(
         group,
         options
     );
 
-    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         group,
         options,
         true,
@@ -242,7 +242,7 @@ const createFeatureDefinitionFunctions = (
         false,
     );
 
-    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
         group,
         options,
         false,
@@ -250,7 +250,7 @@ const createFeatureDefinitionFunctions = (
         false,
     );
 
-    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
         group,
         options,
         false,
@@ -258,7 +258,7 @@ const createFeatureDefinitionFunctions = (
         true,
     );
 
-    return defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases;
+    return featureDefinitionFunctions as DefineScenarioFunctionWithAliases;
 };
 
 const createDefineStepFunction = (scenarios: Scenario[]) => {
