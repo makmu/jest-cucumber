@@ -228,12 +228,12 @@ const createScenarioDefinitionFunction = (
         scenarios.forEach(s => s.defined = true)
 
         stepsDefinitionFunctionCallback({
-            defineStep: createDefineStepFunction(scenarios),
-            given: createDefineStepFunction(scenarios),
-            when: createDefineStepFunction(scenarios),
-            then: createDefineStepFunction(scenarios),
-            and: createDefineStepFunction(scenarios),
-            but: createDefineStepFunction(scenarios),
+            defineStep: createStepDefinitionFunction(scenarios),
+            given: createStepDefinitionFunction(scenarios),
+            when: createStepDefinitionFunction(scenarios),
+            then: createStepDefinitionFunction(scenarios),
+            and: createStepDefinitionFunction(scenarios),
+            but: createStepDefinitionFunction(scenarios),
             pending: () => {
                 // Nothing to do
             }
@@ -317,7 +317,7 @@ const createScenarioDefinitionFunctionWithAliases = (
     return featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases;
 };
 
-const createDefineStepFunction = (scenarios: Scenario[]) => {
+const createStepDefinitionFunction = (scenarios: Scenario[]) => {
     return (stepMatcher: string | RegExp, stepFunction: () => any) => {
 
       scenarios.forEach(scenario => {
