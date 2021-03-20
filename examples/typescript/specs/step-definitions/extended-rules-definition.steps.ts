@@ -1,5 +1,5 @@
 import { loadFeature, defineFeature} from '../../../../src';
-import { DefineStepFunction } from '../../../../src/feature-definition-creation';
+import { StepDefinitionFunction } from '../../../../src/feature-definition-creation';
 import { VendingMachine } from '../../src/vending-machine';
 
 const feature = loadFeature('./examples/typescript/specs/features/extended-rules-definition.feature', {collapseRules: false});
@@ -9,40 +9,40 @@ defineFeature(feature, ({rule}) => {
 
     const myMoney = 0.50;
 
-    const givenTheVendingMachineHasXInStock = (given: DefineStepFunction) => {
+    const givenTheVendingMachineHasXInStock = (given: StepDefinitionFunction) => {
         given(/^the vending machine has "([^"]*)" in stock$/, (itemName: string) => {
             vendingMachine = new VendingMachine();
             vendingMachine.stockItem(itemName, 1);
         });
     };
 
-    const givenTheVendingMachineHasNoXInStock = (given: DefineStepFunction) => {
+    const givenTheVendingMachineHasNoXInStock = (given: StepDefinitionFunction) => {
         given(/^the vending machine has no "([^"]*)" in stock$/, (itemName: string) => {
             vendingMachine = new VendingMachine();
             vendingMachine.stockItem(itemName, 0);
         });
     }
 
-    const givenIHaveInsertedTheCorrectAmountOfMoney = (given: DefineStepFunction) => {
+    const givenIHaveInsertedTheCorrectAmountOfMoney = (given: StepDefinitionFunction) => {
         given('I have inserted the correct amount of money', () => {
             vendingMachine.insertMoney(myMoney);
         });
     };
 
-    const whenISelectX = (when: DefineStepFunction) => {
+    const whenISelectX = (when: StepDefinitionFunction) => {
         when(/^I select "(.*)"$/, (itemName: string) => {
             vendingMachine.dispenseItem(itemName);
         });
     };
 
-    const thenXShouldBeDespensed = (then: DefineStepFunction) => {
+    const thenXShouldBeDespensed = (then: StepDefinitionFunction) => {
         then(/^my "(.*)" should be dispensed$/, (itemName: string) => {
             const inventoryAmount = vendingMachine.items[itemName];
             expect(inventoryAmount).toBe(0);
         });
     }
 
-    const thenMyMoneyShouldBeReturned = (then: DefineStepFunction) => {
+    const thenMyMoneyShouldBeReturned = (then: StepDefinitionFunction) => {
         then(/^my money should be returned$/, () => {
             const returnedMoney = vendingMachine.moneyReturnSlot;
             expect(returnedMoney).toBe(myMoney);
