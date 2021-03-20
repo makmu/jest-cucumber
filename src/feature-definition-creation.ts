@@ -352,37 +352,28 @@ const createStepDefinitionFunction = (scenarios: Scenario[]) => {
     }
 };
 
-const defineScenarioGroup = (
-    group: Rule,
-    provideFeatureDefinition: FeatureDefinitionCallback,
-    options: Options,
-) => {
-
-    const parsedFeatureWithTagFiltersApplied = applyTagFilters(group, options.tagFilter);
-
-    if (
-        parsedFeatureWithTagFiltersApplied.scenarios.length === 0
-            && parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
-            && parsedFeatureWithTagFiltersApplied.rules.length === 0
-    ) {
-        return;
-    }
-
-    provideFeatureDefinition(
-      createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, options)
-    );
-
-    checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
-        parsedFeatureWithTagFiltersApplied,
-        options
-    );
-};
-
 export function defineFeature(
     featureFromFile: Feature,
     provideFeatureDefinition: FeatureDefinitionCallback
 ) {
     describe(featureFromFile.title, () => {
-        defineScenarioGroup(featureFromFile, provideFeatureDefinition, featureFromFile.options);
+        const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
+
+        if (
+            parsedFeatureWithTagFiltersApplied.scenarios.length === 0
+                && parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
+                && parsedFeatureWithTagFiltersApplied.rules.length === 0
+        ) {
+            return;
+        }
+
+        provideFeatureDefinition(
+          createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
+        );
+
+        checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
+            parsedFeatureWithTagFiltersApplied,
+            featureFromFile.options
+        );
     });
 }
