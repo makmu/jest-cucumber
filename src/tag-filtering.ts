@@ -1,4 +1,4 @@
-import { ParsedFeature, ParsedScenario, ParsedScenarioOutline, ScenarioGroup } from './models';
+import { Feature, Rule, Scenario, ScenarioOutline } from './models';
 
 type TagFilterFunction = (tags: string[]) => boolean;
 
@@ -42,8 +42,8 @@ const convertTagFilterExpressionToFunction = (tagFilterExpression: string) => {
 
 const checkIfScenarioMatchesTagFilter = (
     tagFilterExpression: string,
-    feature: ScenarioGroup,
-    scenario: ParsedScenario | ParsedScenarioOutline,
+    feature: Rule,
+    scenario: Scenario | ScenarioOutline,
 ) => {
     const featureAndScenarioTags = [
         ...scenario.tags.map((tag) => tag.toLowerCase()),
@@ -60,7 +60,7 @@ const checkIfScenarioMatchesTagFilter = (
     return tagFilterFunction(featureAndScenarioTags);
 };
 
-const setScenarioSkipped = (parsedFeature: ScenarioGroup, scenario: ParsedScenario, tagFilter: string) => {
+const setScenarioSkipped = (parsedFeature: Rule, scenario: Scenario, tagFilter: string) => {
     const skippedViaTagFilter = !checkIfScenarioMatchesTagFilter(
         tagFilter,
         parsedFeature,
@@ -74,7 +74,7 @@ const setScenarioSkipped = (parsedFeature: ScenarioGroup, scenario: ParsedScenar
 };
 
 export const applyTagFilters = (
-    group: ScenarioGroup,
+    group: Rule,
     tagFilter: string | undefined
 ) => {
     if (tagFilter === undefined) {
@@ -94,5 +94,5 @@ export const applyTagFilters = (
         ...group,
         scenarios,
         scenarioOutlines,
-    } as ParsedFeature;
+    } as Feature;
 };

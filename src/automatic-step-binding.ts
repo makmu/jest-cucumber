@@ -1,4 +1,4 @@
-import { ParsedFeature, ScenarioGroup } from './models';
+import { Feature, Rule } from './models';
 import { matchSteps } from './validation/step-definition-validation';
 import {
     StepsDefinitionCallbackFunction,
@@ -28,7 +28,7 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
     });
 };
 
-const matchAndDefineSteps = (group: ScenarioGroup, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
+const matchAndDefineSteps = (group: Rule, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
     const scenarioOutlineScenarios = group.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
 
     const scenarios = [ ...group.scenarios, ...scenarioOutlineScenarios ];
@@ -43,7 +43,7 @@ const matchAndDefineSteps = (group: ScenarioGroup, test: DefineScenarioFunctionW
 
                     options.defineStep(match.stepMatcher, match.stepFunction);
                 } else if (matches.length === 0) {
-                    const stepCode = generateStepCode(scenario.steps, stepIndex, false);
+                    const stepCode = generateStepCode(scenario.steps[stepIndex], false);
                     // tslint:disable-next-line:max-line-length
                     errors.push(
                         `No matching step found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Please add the following step code: \n\n${stepCode}`
@@ -63,7 +63,7 @@ const matchAndDefineSteps = (group: ScenarioGroup, test: DefineScenarioFunctionW
     });
 };
 
-export const autoBindSteps = (features: ParsedFeature[], stepDefinitions: StepsDefinitionCallbackFunction[]) => {
+export const autoBindSteps = (features: Feature[], stepDefinitions: StepsDefinitionCallbackFunction[]) => {
     stepDefinitions.forEach(registerSteps);
 
     const errors: string[] = [];
@@ -80,7 +80,7 @@ export const autoBindSteps = (features: ParsedFeature[], stepDefinitions: StepsD
 };
 
 export const autoBindStepsWithRules = (
-    features: ParsedFeature[],
+    features: Feature[],
     stepDefinitions: StepsDefinitionCallbackFunction[]
 ) => {
     stepDefinitions.forEach(registerSteps);

@@ -1,4 +1,4 @@
-import { ParsedFeature } from '../models';
+import { Feature } from '../models';
 import { generateScenarioCodeWithSeparateStepFunctions, generateScenarioCode } from './scenario-generation';
 import { generateStepCode } from './step-generation';
 
@@ -9,7 +9,7 @@ export enum ObjectTypeEnum {
 }
 
 const findObjectByLineNumber = (
-    feature: ParsedFeature,
+    feature: Feature,
     lineNumber: number,
 ): { object: any, type: ObjectTypeEnum } | null => {
     let found: any = null;
@@ -47,7 +47,7 @@ const findObjectByLineNumber = (
 };
 
 export const generateCodeFromFeature = (
-    feature: ParsedFeature,
+    feature: Feature,
     lineNumber: number,
 ) => {
     const objectAtLine = findObjectByLineNumber(feature, lineNumber);
@@ -66,7 +66,7 @@ export const generateCodeFromFeature = (
 };
 
 export const generateCodeWithSeparateFunctionsFromFeature = (
-    feature: ParsedFeature,
+    feature: Feature,
     lineNumber: number,
 ) => {
     const objectAtLine = findObjectByLineNumber(feature, lineNumber);
