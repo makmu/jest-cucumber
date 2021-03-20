@@ -25,11 +25,6 @@ export type FeatureDefinitionCallback = (defineScenario: FeatureDefinitionFuncti
 
 export type RuleDefinitionCallback = (defineScenario: ScenarioDefinitionFunctionWithAliases) => void;
 
-export type DefineRuleFunction = (
-    ruleTitle: string,
-    scenariosDefinitionCallback: FeatureDefinitionCallback,
-) => void;
-
 export type DefineScenarioFunction = (
     scenarioTitle: string,
     stepsDefinitionCallback: StepsDefinitionCallbackFunction,
