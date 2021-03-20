@@ -1,4 +1,4 @@
-import { Feature, Rule, Scenario, ScenarioOutline } from './models';
+import { Feature, Scenario, ScenarioOutline } from './models';
 
 type TagFilterFunction = (tags: string[]) => boolean;
 
@@ -42,7 +42,7 @@ const convertTagFilterExpressionToFunction = (tagFilterExpression: string) => {
 
 const checkIfScenarioMatchesTagFilter = (
     tagFilterExpression: string,
-    feature: Rule,
+    feature: Feature,
     scenario: Scenario | ScenarioOutline,
 ) => {
     const featureAndScenarioTags = [
@@ -60,7 +60,7 @@ const checkIfScenarioMatchesTagFilter = (
     return tagFilterFunction(featureAndScenarioTags);
 };
 
-const setScenarioSkipped = (parsedFeature: Rule, scenario: Scenario, tagFilter: string) => {
+const setScenarioSkipped = (parsedFeature: Feature, scenario: Scenario, tagFilter: string) => {
     const skippedViaTagFilter = !checkIfScenarioMatchesTagFilter(
         tagFilter,
         parsedFeature,
@@ -74,24 +74,24 @@ const setScenarioSkipped = (parsedFeature: Rule, scenario: Scenario, tagFilter: 
 };
 
 export const applyTagFilters = (
-    group: Rule,
+    feature: Feature,
     tagFilter: string | undefined
 ): Feature => {
     if (tagFilter === undefined) {
-        return group as Feature;
+        return feature;
     }
 
-    const scenarios = group.scenarios.map((scenario) => setScenarioSkipped(group, scenario, tagFilter));
-    const scenarioOutlines = group.scenarioOutlines
+    const scenarios = feature.scenarios.map((scenario) => setScenarioSkipped(feature, scenario, tagFilter));
+    const scenarioOutlines = feature.scenarioOutlines
         .map((scenarioOutline) => {
             return {
-                ...setScenarioSkipped(group, scenarioOutline, tagFilter),
-                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(group, scenario, tagFilter)),
+                ...setScenarioSkipped(feature, scenarioOutline, tagFilter),
+                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario, tagFilter)),
             };
         });
 
     return {
-        ...group,
+        ...feature,
         scenarios,
         scenarioOutlines,
     } as Feature;
