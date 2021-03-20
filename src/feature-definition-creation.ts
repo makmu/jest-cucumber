@@ -225,7 +225,7 @@ const createDefineScenarioFunction = (
     return defineScenarioFunction;
 };
 
-const createDefineScenarioFunctionWithAliases = (
+const createFeatureDefinitionFunctions = (
     group: Rule,
     options: Options
 ) => {
@@ -312,7 +312,7 @@ const defineScenarioGroup = (
     }
 
     provideFeatureDefinition(
-        createDefineScenarioFunctionWithAliases(parsedFeatureWithTagFiltersApplied, options)
+        createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, options)
     );
 
     checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
