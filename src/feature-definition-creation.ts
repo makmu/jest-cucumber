@@ -115,7 +115,7 @@ const getTestFunction = (skippedViaTagFilter: boolean, only: boolean, skip: bool
     }
 };
 
-const defineScenario = (
+const generateJestTestForScenario = (
     scenarioTitle: string,
     scenario: Scenario,
     only: boolean = false,
@@ -257,7 +257,7 @@ const createScenarioDefinitionFunction = (
                       // Nothing to do
               }, undefined);
           } else {
-              defineScenario(
+              generateJestTestForScenario(
                   scenarioTitle,
                   scenario,
                   only,
