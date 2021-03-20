@@ -60,7 +60,7 @@ export const generateCodeFromFeature = (
             case ObjectTypeEnum.scenarioOutline:
                 return generateScenarioCode(objectAtLine.object);
             case ObjectTypeEnum.step:
-                return generateStepCode(objectAtLine.object.steps, objectAtLine.object.index, false);
+                return generateStepCode(objectAtLine.object.steps[objectAtLine.object.index], false);
         }
     }
 };
@@ -79,7 +79,7 @@ export const generateCodeWithSeparateFunctionsFromFeature = (
             case ObjectTypeEnum.scenarioOutline:
                 return generateScenarioCodeWithSeparateStepFunctions(objectAtLine.object);
             case ObjectTypeEnum.step:
-                return generateStepCode(objectAtLine.object.steps, objectAtLine.object.index, true);
+                return generateStepCode(objectAtLine.object.steps[objectAtLine.object.index], true);
         }
     }
 };

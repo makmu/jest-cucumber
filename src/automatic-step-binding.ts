@@ -4,7 +4,7 @@ import {
     StepsDefinitionCallbackFunction,
     defineFeature,
     defineRuleBasedFeature,
-    DefineScenarioFunctionWithAliases
+    DefineScenarioFunctionWithAliases,
 } from './feature-definition-creation';
 import { generateStepCode } from './code-generation/step-generation';
 
@@ -24,7 +24,7 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
         but: registerStep,
         pending: () => {
             // Nothing to do
-        }
+        },
     });
 };
 
@@ -46,7 +46,7 @@ const matchAndDefineSteps = (group: Rule, test: DefineScenarioFunctionWithAliase
                     const stepCode = generateStepCode(scenario.steps[stepIndex], false);
                     // tslint:disable-next-line:max-line-length
                     errors.push(
-                        `No matching step found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Please add the following step code: \n\n${stepCode}`
+                        `No matching step found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Please add the following step code: \n\n${stepCode}`,
                     );
                 } else {
                     const matchingCode = matches.map(
@@ -55,7 +55,7 @@ const matchAndDefineSteps = (group: Rule, test: DefineScenarioFunctionWithAliase
                     errors.push(
                         `${matches.length} step definition matches were found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Each step can only have one matching step definition. The following step definition matches were found:\n\n${matchingCode.join(
                             '\n\n'
-                        )}`
+                        )}`,
                     );
                 }
             });
@@ -81,7 +81,7 @@ export const autoBindSteps = (features: Feature[], stepDefinitions: StepsDefinit
 
 export const autoBindStepsWithRules = (
     features: Feature[],
-    stepDefinitions: StepsDefinitionCallbackFunction[]
+    stepDefinitions: StepsDefinitionCallbackFunction[],
 ) => {
     stepDefinitions.forEach(registerSteps);
 

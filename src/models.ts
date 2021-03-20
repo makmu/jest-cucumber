@@ -30,6 +30,7 @@ export type Rule = {
     title: string;
     scenarios: Scenario[];
     scenarioOutlines: ScenarioOutline[];
+    defined: boolean;
     tags: string[];
 }
 

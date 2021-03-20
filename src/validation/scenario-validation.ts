@@ -45,7 +45,7 @@ export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
     }
 
     const errors = scenariosWithoutDefinition.map(s => 
-      `Scenario "${s.title}" found been in feature file but no step definitions were provide`
+      `Scenario "${s.title}" found been in feature file but no step definitions were provided`
     );
 
     if (errors.length) {
