@@ -4,7 +4,7 @@ import {
     StepsDefinitionCallbackFunction,
     defineFeature,
     defineRuleBasedFeature,
-    DefineScenarioFunctionWithAliases,
+    FeatureDefinitionFunctions,
 } from './feature-definition-creation';
 import { generateStepCode } from './code-generation/step-generation';
 
@@ -28,7 +28,7 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
     });
 };
 
-const matchAndDefineSteps = (group: Rule, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
+const matchAndDefineSteps = (group: Rule, test: FeatureDefinitionFunctions, errors: string[]) => {
     const scenarioOutlineScenarios = group.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
 
     const scenarios = [ ...group.scenarios, ...scenarioOutlineScenarios ];

@@ -20,7 +20,7 @@ export type StepsDefinitionCallbackOptions = {
     pending: () => void;
 };
 
-export type FeatureDefinitionCallback = (defineScenario: DefineScenarioFunctionWithAliases) => void;
+export type FeatureDefinitionCallback = (defineScenario: FeatureDefinitionFunctions) => void;
 
 export type RulesDefinitionCallbackFunction = (defineRule: DefineRuleFunction) => void;
 
@@ -35,7 +35,7 @@ export type DefineScenarioFunction = (
     timeout?: number,
 ) => void;
 
-export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
+export type FeatureDefinitionFunctions = DefineScenarioFunction & {
     skip: DefineScenarioFunction;
     only: DefineScenarioFunction;
     concurrent: DefineScenarioFunction;
@@ -234,7 +234,7 @@ const createFeatureDefinitionFunctions = (
         options
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
+    (featureDefinitionFunctions as FeatureDefinitionFunctions).only = createDefineScenarioFunction(
         group,
         options,
         true,
@@ -242,7 +242,7 @@ const createFeatureDefinitionFunctions = (
         false,
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
+    (featureDefinitionFunctions as FeatureDefinitionFunctions).skip = createDefineScenarioFunction(
         group,
         options,
         false,
@@ -250,7 +250,7 @@ const createFeatureDefinitionFunctions = (
         false,
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
+    (featureDefinitionFunctions as FeatureDefinitionFunctions).concurrent = createDefineScenarioFunction(
         group,
         options,
         false,
@@ -258,7 +258,7 @@ const createFeatureDefinitionFunctions = (
         true,
     );
 
-    return featureDefinitionFunctions as DefineScenarioFunctionWithAliases;
+    return featureDefinitionFunctions as FeatureDefinitionFunctions;
 };
 
 const createDefineStepFunction = (scenarios: Scenario[]) => {
