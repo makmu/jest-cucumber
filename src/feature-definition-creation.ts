@@ -1,79 +1,79 @@
 import { checkThatFeatureFileAndStepDefinitionsHaveSameScenarios } from './validation/scenario-validation';
-import {
-    ScenarioFromStepDefinitions,
-    FeatureFromStepDefinitions,
-    StepFromStepDefinitions,
-    ParsedFeature, ParsedScenario,
-    Options, ParsedScenarioOutline,
-    ScenarioGroup
-} from './models';
-import {
-    ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps,
-    matchSteps,
-} from './validation/step-definition-validation';
+import { Feature, Scenario, Rule, Options, ScenarioOutline } from './models';
+import { ensureThereAreNoMissingSteps, matchSteps } from './validation/step-definition-validation';
 import { applyTagFilters } from './tag-filtering';
+import { generateStepCode } from './code-generation/step-generation';
+import { generateScenarioCode } from './code-generation/scenario-generation';
 
 export type StepsDefinitionCallbackOptions = {
-    defineStep: DefineStepFunction;
-    given: DefineStepFunction;
-    when: DefineStepFunction;
-    then: DefineStepFunction;
-    and: DefineStepFunction;
-    but: DefineStepFunction;
+    defineStep: StepDefinitionFunction;
+    given: StepDefinitionFunction;
+    when: StepDefinitionFunction;
+    then: StepDefinitionFunction;
+    and: StepDefinitionFunction;
+    but: StepDefinitionFunction;
     pending: () => void;
 };
 
-export type ScenariosDefinitionCallbackFunction = (defineScenario: DefineScenarioFunctionWithAliases) => void;
+export type FeatureDefinitionCallback = (defineScenario: FeatureDefinitionFunctions) => void;
 
-export type RulesDefinitionCallbackFunction = (defineRule: DefineRuleFunction) => void;
-
-export type DefineRuleFunction = (
-    ruleTitle: string,
-    scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction
-) => void;
+export type RuleDefinitionCallback = (defineScenario: ScenarioDefinitionFunctionWithAliases) => void;
 
 export type DefineScenarioFunction = (
     scenarioTitle: string,
     stepsDefinitionCallback: StepsDefinitionCallbackFunction,
-    timeout?: number,
+    timeout?: number
 ) => void;
 
-export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
+export type RuleDefinitionFunction = (ruleTitle: string, provideRuleDefinition: RuleDefinitionCallback) => void;
+
+export type FeatureDefinitionFunctions = ScenarioDefinitionFunctionWithAliases & {
+    rule: RuleDefinitionFunction;
+    test: FeatureDefinitionFunctions;
+};
+
+export type ScenarioDefinitionFunctionWithAliases = DefineScenarioFunction & {
     skip: DefineScenarioFunction;
     only: DefineScenarioFunction;
     concurrent: DefineScenarioFunction;
 };
 
 export type StepsDefinitionCallbackFunction = (options: StepsDefinitionCallbackOptions) => void;
-export type DefineStepFunction = (stepMatcher: string | RegExp, stepDefinitionCallback: (...args: any[]) => any) => any;
+export type StepDefinitionFunction = (
+    stepMatcher: string | RegExp,
+    stepDefinitionCallback: (...args: any[]) => any
+) => any;
 
-const processScenarioTitleTemplate = (
+type TestTitleFunction = (scenarioTitle: string, scenario: Scenario, options: Options) => string;
+
+const createTestTitleFunction = (feature: Feature) => (
     scenarioTitle: string,
-    group: ScenarioGroup,
+    scenario: Scenario,
     options: Options,
-    parsedScenario: ParsedScenario,
-    parsedScenarioOutline: ParsedScenarioOutline,
 ) => {
     if (options && options.scenarioNameTemplate) {
         try {
-            return  options && options.scenarioNameTemplate({
-                featureTitle: group.title,
-                scenarioTitle: scenarioTitle.toString(),
-                featureTags: group.tags,
-                scenarioTags: (parsedScenario || parsedScenarioOutline).tags
-            });
+            return (
+                options &&
+                options.scenarioNameTemplate({
+                    featureTitle: feature.title,
+                    scenarioTitle: scenarioTitle.toString(),
+                    featureTags: feature.tags,
+                    scenarioTags: scenario.tags
+                })
+            );
         } catch (err) {
             throw new Error(
                 // tslint:disable-next-line:max-line-length
-                `An error occurred while executing a scenario name template. \nTemplate:\n${options.scenarioNameTemplate}\nError:${err.message}`,
+                `An error occurred while executing a scenario name template. \nTemplate:\n${options.scenarioNameTemplate}\nError:${err.message}`
             );
         }
     }
 
-    return scenarioTitle;
+    return scenario.title;
 };
 
-const checkForPendingSteps = (scenarioFromStepDefinitions: ScenarioFromStepDefinitions) => {
+const checkForPendingSteps = (scenarioFromStepDefinitions: Scenario) => {
     let scenarioPending = false;
 
     scenarioFromStepDefinitions.steps.forEach((step) => {
@@ -113,236 +113,265 @@ const getTestFunction = (skippedViaTagFilter: boolean, only: boolean, skip: bool
     }
 };
 
-const defineScenario = (
+const generateJestTestForScenario = (
     scenarioTitle: string,
-    scenarioFromStepDefinitions: ScenarioFromStepDefinitions,
-    parsedScenario: ParsedScenario,
+    scenario: Scenario,
     only: boolean = false,
     skip: boolean = false,
     concurrent: boolean = false,
-    timeout: number | undefined = undefined,
+    timeout: number | undefined = undefined
 ) => {
-    const testFunction = getTestFunction(parsedScenario.skippedViaTagFilter, only, skip, concurrent);
+    const testFunction = getTestFunction(scenario.skippedViaTagFilter, only, skip, concurrent);
 
-    testFunction(scenarioTitle, () => {
-        return scenarioFromStepDefinitions.steps.reduce((promiseChain, nextStep, index) => {
-            const parsedStep = parsedScenario.steps[index];
-            const stepArgument = parsedStep.stepArgument;
-            const matches = matchSteps(
-                parsedScenario.steps[index].stepText,
-                scenarioFromStepDefinitions.steps[index].stepMatcher
-            );
-            let matchArgs: string[] = [];
+    testFunction(
+        scenarioTitle,
+        () => {
+            return scenario.steps.reduce((promiseChain, nextStep) => {
+                const stepArgument = nextStep.stepArgument;
+                const matches = matchSteps(nextStep.stepText, nextStep.stepMatcher);
+                let matchArgs: string[] = [];
 
-            if (matches && (matches as RegExpMatchArray).length) {
-                matchArgs = (matches as RegExpMatchArray).slice(1);
-            }
+                if (matches && (matches as RegExpMatchArray).length) {
+                    matchArgs = (matches as RegExpMatchArray).slice(1);
+                }
 
-            const args = [ ...matchArgs, stepArgument ];
+                const args = [ ...matchArgs, stepArgument ];
 
-            return promiseChain.then(() => {
-              return Promise.resolve()
-                .then(() => nextStep.stepFunction(...args))
-                .catch((error) => {
-                    error.message = `jest-cucumber: ${parsedStep.stepText} (line ${parsedStep.lineNumber})\n\n${error.message}`;
-                    throw error;
+                return promiseChain.then(() => {
+                    return Promise.resolve().then(() => nextStep.stepFunction(...args)).catch((error) => {
+                        error.message = `jest-cucumber: ${nextStep.stepText} (line ${nextStep.lineNumber})\n\n${error.message}`;
+                        throw error;
+                    });
                 });
-            });
-        }, Promise.resolve());
-    }, timeout);
+            }, Promise.resolve());
+        },
+        timeout
+    );
 };
 
-const createDefineScenarioFunction = (
-    featureFromStepDefinitions: FeatureFromStepDefinitions,
-    parsedFeature: ScenarioGroup,
-    options: Options,
-    only: boolean = false,
-    skip: boolean = false,
-    concurrent: boolean = false,
+const createRuleDefinitionFunction = (feature: Feature) => (
+    ruleTitle: string,
+    provideRuleDefinition: RuleDefinitionCallback
 ) => {
-    const defineScenarioFunction: DefineScenarioFunction = (
-        scenarioTitle: string,
-        stepsDefinitionFunctionCallback: StepsDefinitionCallbackFunction,
-        timeout?: number,
-    ) => {
-        const scenarioFromStepDefinitions: ScenarioFromStepDefinitions = {
-            title: scenarioTitle,
-            steps: [],
-        };
+    const matchingRules = feature.rules.filter((r) => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase());
 
-        featureFromStepDefinitions.scenarios.push(scenarioFromStepDefinitions);
-
-        stepsDefinitionFunctionCallback({
-            defineStep: createDefineStepFunction(scenarioFromStepDefinitions),
-            given: createDefineStepFunction(scenarioFromStepDefinitions),
-            when: createDefineStepFunction(scenarioFromStepDefinitions),
-            then: createDefineStepFunction(scenarioFromStepDefinitions),
-            and: createDefineStepFunction(scenarioFromStepDefinitions),
-            but: createDefineStepFunction(scenarioFromStepDefinitions),
-            pending: () => {
-                // Nothing to do
-            }
-        });
-
-        const parsedScenario = parsedFeature.scenarios
-            .filter((s) => s.title.toLowerCase() === scenarioTitle.toLowerCase())[0];
-
-        const parsedScenarioOutline = parsedFeature.scenarioOutlines
-            .filter((s) => s.title.toLowerCase() === scenarioTitle.toLowerCase())[0];
-
-        scenarioTitle = processScenarioTitleTemplate(
-            scenarioTitle,
-            parsedFeature,
-            options,
-            parsedScenario,
-            parsedScenarioOutline,
-        );
-
-        ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps(
-            options,
-            parsedScenario || parsedScenarioOutline,
-            scenarioFromStepDefinitions,
-        );
-
-        if (checkForPendingSteps(scenarioFromStepDefinitions)) {
-            xtest(scenarioTitle, () => {
-                    // Nothing to do
-            }, undefined);
-        } else if (parsedScenario) {
-            defineScenario(
-                scenarioTitle,
-                scenarioFromStepDefinitions,
-                parsedScenario,
-                only,
-                skip,
-                concurrent,
-                timeout,
-            );
-        } else if (parsedScenarioOutline) {
-            parsedScenarioOutline.scenarios.forEach((scenario) => {
-                defineScenario(
-                    (scenario.title || scenarioTitle),
-                    scenarioFromStepDefinitions,
-                    scenario,
-                    only,
-                    skip,
-                    concurrent,
-                    timeout,
-                );
-            });
-        }
-    };
-
-    return defineScenarioFunction;
-};
-
-const createDefineScenarioFunctionWithAliases = (
-    featureFromStepDefinitions: FeatureFromStepDefinitions,
-    group: ScenarioGroup,
-    options: Options
-) => {
-    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(
-        featureFromStepDefinitions,
-        group,
-        options
-    );
-
-    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
-        featureFromStepDefinitions,
-        group,
-        options,
-        true,
-        false,
-        false,
-    );
-
-    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
-        featureFromStepDefinitions,
-        group,
-        options,
-        false,
-        true,
-        false,
-    );
-
-    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
-        featureFromStepDefinitions,
-        group,
-        options,
-        false,
-        false,
-        true,
-    );
-
-    return defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases;
-};
-
-const createDefineStepFunction = (scenarioFromStepDefinitions: ScenarioFromStepDefinitions) => {
-    return (stepMatcher: string | RegExp, stepFunction: () => any) => {
-        const stepDefinition: StepFromStepDefinitions = {
-            stepMatcher,
-            stepFunction,
-        };
-
-        scenarioFromStepDefinitions.steps.push(stepDefinition);
-    };
-};
-
-const defineScenarioGroup = (
-    group: ScenarioGroup,
-    scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction,
-    options: Options,
-) => {
-    const featureFromDefinedSteps: FeatureFromStepDefinitions = {
-        title: group.title,
-        scenarios: [],
-    };
-
-    const parsedFeatureWithTagFiltersApplied = applyTagFilters(group, options.tagFilter);
-
-    if (
-        parsedFeatureWithTagFiltersApplied.scenarios.length === 0
-            && parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0
-    ) {
-        return;
+    if (matchingRules.length === 0) {
+        throw new Error(`No rule found in feature that matches "${ruleTitle}"`);
     }
 
-    scenariosDefinitionCallback(
-        createDefineScenarioFunctionWithAliases(featureFromDefinedSteps, parsedFeatureWithTagFiltersApplied, options)
+    if (matchingRules.length > 1) {
+        throw new Error(`More than one rule found in feature that maches "${ruleTitle}"`);
+    }
+
+    const matchingRule = matchingRules[0];
+    if (matchingRule.defined) {
+        throw new Error(`Rule "${ruleTitle} defined multiple times`);
+    }
+
+    matchingRule.defined = true;
+
+    describe(ruleTitle, () =>
+        provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, createTestTitleFunction(feature), feature.options))
     );
 
-    checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
-        parsedFeatureWithTagFiltersApplied,
-        featureFromDefinedSteps,
-        options
-    );
+    const errors = [
+        ...matchingRule.scenarios
+            .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
+            .map(
+                (s) =>
+                    `Scenario "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
+                        s
+                    )}"`
+            ),
+        ...matchingRule.scenarioOutlines
+            .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
+            .map(
+                (s) =>
+                    `Scenario outline "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
+                        s
+                    )}"`
+            )
+    ];
+
+    if (errors.length > 0) {
+        throw new Error(errors.join('\n\n'));
+    }
 };
 
-export function defineFeature(
-    featureFromFile: ParsedFeature,
-    scenariosDefinitionCallback: ScenariosDefinitionCallbackFunction
-) {
-    describe(featureFromFile.title, () => {
-        defineScenarioGroup(featureFromFile, scenariosDefinitionCallback, featureFromFile.options);
-    });
-}
+const createScenarioDefinitionFunction = (
+    scenarioGroup: Feature | Rule,
+    buildTestTitle: TestTitleFunction,
+    options: Options,
+    only: boolean = false,
+    skip: boolean = false,
+    concurrent: boolean = false
+) => (scenarioTitle: string, stepsDefinitionFunctionCallback: StepsDefinitionCallbackFunction, timeout?: number) => {
+    const matchingScenarios = scenarioGroup.scenarios.filter(
+        (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
+    );
+    const matchingScenarioOutlines = scenarioGroup.scenarioOutlines.filter(
+        (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
+    );
 
-export function defineRuleBasedFeature(
-    featureFromFile: ParsedFeature,
-    rulesDefinitionCallback: RulesDefinitionCallbackFunction
-) {
-    describe(featureFromFile.title, () => {
-        rulesDefinitionCallback((ruleText: string, callback: ScenariosDefinitionCallbackFunction) => {
-            const matchingRules = featureFromFile.rules.filter(
-                (rule) => rule.title.toLocaleLowerCase() === ruleText.toLocaleLowerCase()
+    let scenarios: Scenario[] = [];
+    if (matchingScenarios.length === 0 && matchingScenarioOutlines.length === 0) {
+        throw new Error(`No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`);
+    }
+    if (matchingScenarios.length + matchingScenarioOutlines.length > 1) {
+        throw new Error(`More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`);
+    }
+
+    if (matchingScenarios.length === 1) {
+        scenarios = [ matchingScenarios[0] ];
+    } else {
+        matchingScenarioOutlines[0].stepDefinitionsAvailable = true;
+        scenarios = matchingScenarioOutlines[0].scenarios;
+    }
+
+    scenarios.forEach((s) => (s.stepDefinitionsAvailable = true));
+
+    stepsDefinitionFunctionCallback({
+        defineStep: createStepDefinitionFunction(scenarios),
+        given: createStepDefinitionFunction(scenarios),
+        when: createStepDefinitionFunction(scenarios),
+        then: createStepDefinitionFunction(scenarios),
+        and: createStepDefinitionFunction(scenarios),
+        but: createStepDefinitionFunction(scenarios),
+        pending: () => {
+            // Nothing to do
+        }
+    });
+
+    scenarios.forEach((scenario) => {
+        const testTitle = buildTestTitle(scenarioTitle, scenario, options);
+
+        ensureThereAreNoMissingSteps(options, scenario);
+
+        if (checkForPendingSteps(scenario)) {
+            xtest(
+                testTitle,
+                () => {
+                    // Nothing to do
+                },
+                undefined
             );
-            if (matchingRules.length != 1) {
-                throw new Error(`No matching rule found for '${ruleText}'"`);
+        } else {
+            generateJestTestForScenario(testTitle, scenario, only, skip, concurrent, timeout);
+        }
+    });
+};
+
+const createFeatureDefinitionFunctions = (feature: Feature, options: Options): FeatureDefinitionFunctions => {
+    const featureDefinitionFunctions = createScenarioDefinitionFunctionWithAliases(
+        feature,
+        createTestTitleFunction(feature),
+        options
+    ) as FeatureDefinitionFunctions;
+
+    featureDefinitionFunctions.rule = createRuleDefinitionFunction(feature);
+    featureDefinitionFunctions.test = featureDefinitionFunctions;
+
+    return featureDefinitionFunctions;
+};
+
+const createScenarioDefinitionFunctionWithAliases = (
+    scenarioGroup: Feature | Rule,
+    buildTestTitle: TestTitleFunction,
+    options: Options
+): ScenarioDefinitionFunctionWithAliases => {
+    const featureDefinitionFunctions = createScenarioDefinitionFunction(scenarioGroup, buildTestTitle, options);
+    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).only = createScenarioDefinitionFunction(
+        scenarioGroup,
+        buildTestTitle,
+        options,
+        true,
+        false,
+        false
+    );
+
+    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).skip = createScenarioDefinitionFunction(
+        scenarioGroup,
+        buildTestTitle,
+        options,
+        false,
+        true,
+        false
+    );
+
+    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).concurrent = createScenarioDefinitionFunction(
+        scenarioGroup,
+        buildTestTitle,
+        options,
+        false,
+        false,
+        true
+    );
+
+    return featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases;
+};
+
+const createStepDefinitionFunction = (scenarios: Scenario[]) => {
+    return (stepMatcher: string | RegExp, stepFunction: () => any) => {
+        scenarios.forEach((scenario) => {
+            const unmatchedSteps = scenario.steps.filter((s) => s.stepMatcher === undefined);
+            if (unmatchedSteps.length == 0) {
+                throw new Error(
+                    `Step definition "${stepMatcher}" found for scenario "${scenario.title}" but all steps already defined.`
+                );
             }
 
-            describe(ruleText, () => {
-                defineScenarioGroup(matchingRules[0], callback, featureFromFile.options);
-            })
+            const matchingSteps = scenario.steps.filter((s) => matchSteps(s.stepText, stepMatcher));
+
+            if (matchingSteps.length === 0) {
+                throw new Error(`Scenario "${scenario.title}" in feature file has no step matching "${stepMatcher}"`);
+            } else if (matchingSteps.length > 1) {
+                throw new Error(`More than one step in scenario "${scenario.title}" matches "${stepMatcher}"`);
+            }
+
+            const matchingStep = matchingSteps[0];
+
+            if (matchingStep !== unmatchedSteps[0]) {
+                const nextStepIndex = scenario.steps.length - unmatchedSteps.length;
+                throw new Error(
+                    `Expected step #${nextStepIndex + 1} to match "${scenario.steps[
+                        nextStepIndex
+                    ]}". Try adding the following code:\n\n${generateStepCode(scenario.steps[nextStepIndex])}`
+                );
+            }
+
+            if (matchingSteps[0].stepMatcher) {
+                throw new Error(
+                    `Step ${matchingSteps[0]
+                        .stepText} in scenario "${scenario.title}" matches "${stepMatcher} but also matches "${matchingSteps[0]
+                        .stepMatcher}"`
+                );
+            }
+
+            matchingSteps[0].stepMatcher = stepMatcher;
+            matchingSteps[0].stepFunction = stepFunction;
         });
+    };
+};
+
+export function defineFeature(featureFromFile: Feature, provideFeatureDefinition: FeatureDefinitionCallback) {
+    describe(featureFromFile.title, () => {
+        const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
+
+        if (
+            parsedFeatureWithTagFiltersApplied.scenarios.length === 0 &&
+            parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0 &&
+            parsedFeatureWithTagFiltersApplied.rules.length === 0
+        ) {
+            return;
+        }
+
+        provideFeatureDefinition(
+            createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
+        );
+
+        checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
+            parsedFeatureWithTagFiltersApplied,
+            featureFromFile.options
+        );
     });
 }
