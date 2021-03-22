@@ -192,12 +192,12 @@ const createDefineRuleFunction = (
                 )
         ];
 
-      if (errors.length > 0) {
-          throw new Error(errors.join('\n\n'));
-      }
+        if (errors.length > 0) {
+            throw new Error(errors.join('\n\n'));
+        }
     };
     return defineRuleFunction;
-}
+};
 
 const createDefineScenarioFunction = (
     scenarioGroup: Feature | Rule,
@@ -214,21 +214,21 @@ const createDefineScenarioFunction = (
         timeout?: number,
     ) => {
         const matchingScenarios = scenarioGroup.scenarios.filter(
-            (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
+            (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase(),
         );
         const matchingScenarioOutlines = scenarioGroup.scenarioOutlines.filter(
-            (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
+            (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase(),
         );
 
         let scenarios: Scenario[] = [];
         if (matchingScenarios.length === 0 && matchingScenarioOutlines.length === 0) {
             throw new Error(
-                `No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`
+                `No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`,
             );
         }
         if (matchingScenarios.length + matchingScenarioOutlines.length > 1) {
             throw new Error(
-                `More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`
+                `More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`,
             );
         }
 
