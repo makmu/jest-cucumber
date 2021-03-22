@@ -222,10 +222,14 @@ const createDefineScenarioFunction = (
 
         let scenarios: Scenario[] = [];
         if (matchingScenarios.length === 0 && matchingScenarioOutlines.length === 0) {
-            throw new Error(`No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`);
+            throw new Error(
+                `No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`
+            );
         }
         if (matchingScenarios.length + matchingScenarioOutlines.length > 1) {
-            throw new Error(`More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`);
+            throw new Error(
+                `More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`
+            );
         }
 
         if (matchingScenarios.length === 1) {
@@ -263,7 +267,7 @@ const createDefineScenarioFunction = (
                     () => {
                         // Nothing to do
                     },
-                    undefined
+                    undefined,
                 );
             } else {
                 defineScenario(
@@ -276,7 +280,7 @@ const createDefineScenarioFunction = (
                 );
             }
         });
-    }
+    };
 
     return defineScenarioFunction;
 };
@@ -299,7 +303,13 @@ const createDefineScenarioFunctionWithAliases = (
     processScenarioTitleTemplate: ScenarioTitleFunction,
     options: Options,
 ): DefineScenarioFunctionWithAliases => {
-    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(scenarioGroup, processScenarioTitleTemplate, options);
+
+    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(
+      scenarioGroup,
+      processScenarioTitleTemplate,
+      options,
+    );
+
     (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         scenarioGroup,
         processScenarioTitleTemplate,
@@ -334,9 +344,9 @@ const createDefineStepFunction = (scenarios: Scenario[]) => {
     return (stepMatcher: string | RegExp, stepFunction: () => any) => {
         scenarios.forEach((scenario) => {
             const unmatchedSteps = scenario.steps.filter((s) => s.stepMatcher === undefined);
-            if (unmatchedSteps.length == 0) {
+            if (unmatchedSteps.length === 0) {
                 throw new Error(
-                    `Step definition "${stepMatcher}" found for scenario "${scenario.title}" but all steps already defined.`
+                    `Step definition "${stepMatcher}" found for scenario "${scenario.title}" but all steps already defined.`,
                 );
             }
 
@@ -355,7 +365,7 @@ const createDefineStepFunction = (scenarios: Scenario[]) => {
                 throw new Error(
                     `Expected step #${nextStepIndex + 1} to match "${scenario.steps[
                         nextStepIndex
-                    ]}". Try adding the following code:\n\n${generateStepCode(scenario.steps[nextStepIndex])}`
+                    ]}". Try adding the following code:\n\n${generateStepCode(scenario.steps[nextStepIndex])}`,
                 );
             }
 
@@ -363,7 +373,7 @@ const createDefineStepFunction = (scenarios: Scenario[]) => {
                 throw new Error(
                     `Step ${matchingSteps[0]
                         .stepText} in scenario "${scenario.title}" matches "${stepMatcher} but also matches "${matchingSteps[0]
-                        .stepMatcher}"`
+                        .stepMatcher}"`,
                 );
             }
 
@@ -379,11 +389,11 @@ export function defineFeature(
 ) {
     const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile);
 
-    const totalNumberOfFilteredScenarios = 
+    const totalNumberOfFilteredScenarios =
       parsedFeatureWithTagFiltersApplied.scenarios.length
       + parsedFeatureWithTagFiltersApplied.scenarioOutlines.length
       + parsedFeatureWithTagFiltersApplied.rules
-          .map(r => r.scenarios.length + r.scenarioOutlines.length)
+          .map((r) => r.scenarios.length + r.scenarioOutlines.length)
           .reduce((previousCount, currentCount) => previousCount + currentCount, 0);
     if (
       totalNumberOfFilteredScenarios === 0
