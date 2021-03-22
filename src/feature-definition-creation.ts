@@ -373,7 +373,10 @@ const createDefineStepFunction = (scenarios: Scenario[]) => {
     };
 };
 
-export function defineFeature(featureFromFile: Feature, provideFeatureDefinition: FeatureDefinitionCallbackFunction) {
+export function defineFeature(
+    featureFromFile: Feature,
+    scenariosDefinitionCallback: FeatureDefinitionCallbackFunction,
+) {
     describe(featureFromFile.title, () => {
         const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
 
@@ -385,7 +388,7 @@ export function defineFeature(featureFromFile: Feature, provideFeatureDefinition
             return;
         }
 
-        provideFeatureDefinition(
+        scenariosDefinitionCallback(
             createDefineFeatureFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
         );
 
