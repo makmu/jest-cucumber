@@ -113,34 +113,30 @@ const defineScenario = (
     only: boolean = false,
     skip: boolean = false,
     concurrent: boolean = false,
-    timeout: number | undefined = undefined
+    timeout: number | undefined = undefined,
 ) => {
     const testFunction = getTestFunction(scenario.skippedViaTagFilter, only, skip, concurrent);
 
-    testFunction(
-        scenarioTitle,
-        () => {
-            return scenario.steps.reduce((promiseChain, nextStep) => {
-                const stepArgument = nextStep.stepArgument;
-                const matches = matchSteps(nextStep.stepText, nextStep.stepMatcher);
-                let matchArgs: string[] = [];
+    testFunction(scenarioTitle, () => {
+        return scenario.steps.reduce((promiseChain, nextStep) => {
+            const stepArgument = nextStep.stepArgument;
+            const matches = matchSteps(nextStep.stepText, nextStep.stepMatcher);
+            let matchArgs: string[] = [];
 
-                if (matches && (matches as RegExpMatchArray).length) {
-                    matchArgs = (matches as RegExpMatchArray).slice(1);
-                }
+            if (matches && (matches as RegExpMatchArray).length) {
+                matchArgs = (matches as RegExpMatchArray).slice(1);
+            }
 
-                const args = [ ...matchArgs, stepArgument ];
+            const args = [ ...matchArgs, stepArgument ];
 
-                return promiseChain.then(() => {
-                    return Promise.resolve().then(() => nextStep.stepFunction(...args)).catch((error) => {
-                        error.message = `jest-cucumber: ${nextStep.stepText} (line ${nextStep.lineNumber})\n\n${error.message}`;
-                        throw error;
-                    });
+            return promiseChain.then(() => {
+                return Promise.resolve().then(() => nextStep.stepFunction(...args)).catch((error) => {
+                    error.message = `jest-cucumber: ${nextStep.stepText} (line ${nextStep.lineNumber})\n\n${error.message}`;
+                    throw error;
                 });
-            }, Promise.resolve());
-        },
-        timeout
-    );
+            });
+        }, Promise.resolve());
+    }, timeout);
 };
 
 const createRuleDefinitionFunction = (feature: Feature) => (
