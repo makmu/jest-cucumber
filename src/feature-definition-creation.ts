@@ -144,7 +144,7 @@ const defineScenario = (
     }, timeout);
 };
 
-const createRuleDefinitionFunction = (feature: Feature) => (
+const createDefineRuleFunction = (feature: Feature) => (
     ruleTitle: string,
     provideRuleDefinition: RulesDefinitionCallbackFunction
 ) => {
@@ -193,7 +193,7 @@ const createRuleDefinitionFunction = (feature: Feature) => (
     }
 };
 
-const createScenarioDefinitionFunction = (
+const createDefineScenarioFunction = (
     scenarioGroup: Feature | Rule,
     buildTestTitle: TestTitleFunction,
     options: Options,
@@ -263,7 +263,7 @@ const createFeatureDefinitionFunctions = (feature: Feature, options: Options): D
         options
     ) as DefineFeatureFunctions;
 
-    featureDefinitionFunctions.rule = createRuleDefinitionFunction(feature);
+    featureDefinitionFunctions.rule = createDefineRuleFunction(feature);
     featureDefinitionFunctions.test = featureDefinitionFunctions;
 
     return featureDefinitionFunctions;
@@ -274,8 +274,8 @@ const createScenarioDefinitionFunctionWithAliases = (
     buildTestTitle: TestTitleFunction,
     options: Options
 ): DefineScenarioFunctionWithAliases => {
-    const featureDefinitionFunctions = createScenarioDefinitionFunction(scenarioGroup, buildTestTitle, options);
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createScenarioDefinitionFunction(
+    const featureDefinitionFunctions = createDefineScenarioFunction(scenarioGroup, buildTestTitle, options);
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         scenarioGroup,
         buildTestTitle,
         options,
@@ -284,7 +284,7 @@ const createScenarioDefinitionFunctionWithAliases = (
         false
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createScenarioDefinitionFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
         scenarioGroup,
         buildTestTitle,
         options,
@@ -293,7 +293,7 @@ const createScenarioDefinitionFunctionWithAliases = (
         false
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createScenarioDefinitionFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
         scenarioGroup,
         buildTestTitle,
         options,
