@@ -35,6 +35,10 @@ export type Rule = {
 }
 
 export interface Feature extends Rule {
+    title: string;
+    scenarios: Scenario[];
+    scenarioOutlines: ScenarioOutline[];
+    tags: string[];
     rules: Rule[];
     options: Options;
 };
