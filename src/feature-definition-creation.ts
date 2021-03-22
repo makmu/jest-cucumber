@@ -59,7 +59,7 @@ const createProcessScenarioTitleTemplate = (feature: Feature) => (
         } catch (err) {
             throw new Error(
                 // tslint:disable-next-line:max-line-length
-                `An error occurred while executing a scenario name template. \nTemplate:\n${options.scenarioNameTemplate}\nError:${err.message}`
+                `An error occurred while executing a scenario name template. \nTemplate:\n${options.scenarioNameTemplate}\nError:${err.message}`,
             );
         }
     }
