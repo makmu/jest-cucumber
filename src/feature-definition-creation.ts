@@ -15,7 +15,7 @@ export type StepsDefinitionCallbackOptions = {
     pending: () => void;
 };
 
-export type FeatureDefinitionCallbackFunction = (defineScenrioOrRule: DefineFeatureFunctions) => void;
+export type FeatureDefinitionCallbackFunction = (defineScenarioOrRule: DefineFeatureFunctions) => void;
 
 export type RulesDefinitionCallbackFunction = (defineScenario: DefineScenarioFunctionWithAliases) => void;
 
