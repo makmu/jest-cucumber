@@ -41,7 +41,7 @@ export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
 export type StepsDefinitionCallbackFunction = (options: StepsDefinitionCallbackOptions) => void;
 export type DefineStepFunction = ( stepMatcher: string | RegExp, stepDefinitionCallback: (...args: any[]) => any) => any;
 
-type TestTitleFunction = (scenarioTitle: string, scenario: Scenario, options: Options) => string;
+type ScenarioTitleFunction = (scenarioTitle: string, scenario: Scenario, options: Options) => string;
 
 const createProcessScenarioTitleTemplate = (feature: Feature) => (
     scenarioTitle: string,
@@ -201,7 +201,7 @@ const createDefineRuleFunction = (
 
 const createDefineScenarioFunction = (
     scenarioGroup: Feature | Rule,
-    processScenarioTitleTemplate: TestTitleFunction,
+    processScenarioTitleTemplate: ScenarioTitleFunction,
     options: Options,
     only: boolean = false,
     skip: boolean = false,
@@ -285,7 +285,7 @@ const createDefineFeatureFunctions = (feature: Feature, options: Options): Defin
     const featureDefinitionFunctions = createDefineScenarioFunctionWithAliases(
         feature,
         createProcessScenarioTitleTemplate(feature),
-        options
+        options,
     ) as DefineFeatureFunctions;
 
     featureDefinitionFunctions.rule = createDefineRuleFunction(feature);
@@ -296,35 +296,35 @@ const createDefineFeatureFunctions = (feature: Feature, options: Options): Defin
 
 const createDefineScenarioFunctionWithAliases = (
     scenarioGroup: Feature | Rule,
-    buildTestTitle: TestTitleFunction,
-    options: Options
+    processScenarioTitleTemplate: ScenarioTitleFunction,
+    options: Options,
 ): DefineScenarioFunctionWithAliases => {
-    const featureDefinitionFunctions = createDefineScenarioFunction(scenarioGroup, buildTestTitle, options);
+    const featureDefinitionFunctions = createDefineScenarioFunction(scenarioGroup, processScenarioTitleTemplate, options);
     (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         scenarioGroup,
-        buildTestTitle,
+        processScenarioTitleTemplate,
         options,
         true,
         false,
-        false
+        false,
     );
 
     (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
         scenarioGroup,
-        buildTestTitle,
+        processScenarioTitleTemplate,
         options,
         false,
         true,
-        false
+        false,
     );
 
     (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
         scenarioGroup,
-        buildTestTitle,
+        processScenarioTitleTemplate,
         options,
         false,
         false,
-        true
+        true,
     );
 
     return featureDefinitionFunctions as DefineScenarioFunctionWithAliases;
