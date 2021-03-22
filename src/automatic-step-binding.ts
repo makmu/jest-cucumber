@@ -71,9 +71,9 @@ export const autoBindSteps = (features: Feature[], stepDefinitions: StepsDefinit
     features.forEach((feature) => {
         defineFeature(feature, ({test, rule}) => {
             matchAndDefineSteps(feature, test, errors);
-            feature.rules.forEach(r => {
-              rule(r.title, (test) => {
-                matchAndDefineSteps(r, test, errors)
+            feature.rules.forEach(parsedRule => {
+              rule(parsedRule.title, (test) => {
+                matchAndDefineSteps(parsedRule, test, errors)
               })
             })
         });
