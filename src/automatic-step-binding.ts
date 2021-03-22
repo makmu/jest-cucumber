@@ -27,7 +27,7 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
     });
 };
 
-const matchAndDefineSteps = (group: Rule, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
+const matchAndDefineSteps = (group: Rule | Feature, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
     const scenarioOutlineScenarios = group.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
 
     const scenarios = [ ...group.scenarios, ...scenarioOutlineScenarios ];
@@ -72,9 +72,9 @@ export const autoBindSteps = (features: Feature[], stepDefinitions: StepsDefinit
             matchAndDefineSteps(feature, test, errors);
             feature.rules.forEach(parsedRule => {
               rule(parsedRule.title, (test) => {
-                matchAndDefineSteps(parsedRule, test, errors)
-              })
-            })
+                matchAndDefineSteps(parsedRule, test, errors);
+              });
+            });
         });
     });
 

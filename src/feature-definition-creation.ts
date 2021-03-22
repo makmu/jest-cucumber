@@ -22,7 +22,7 @@ export type RulesDefinitionCallbackFunction = (defineScenario: DefineScenarioFun
 export type DefineScenarioFunction = (
     scenarioTitle: string,
     stepsDefinitionCallback: StepsDefinitionCallbackFunction,
-    timeout?: number
+    timeout?: number,
 ) => void;
 
 export type DefineRuleFunction = (ruleTitle: string, provideRuleDefinition: RulesDefinitionCallbackFunction) => void;
@@ -39,7 +39,9 @@ export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
 };
 
 export type StepsDefinitionCallbackFunction = (options: StepsDefinitionCallbackOptions) => void;
-export type DefineStepFunction = ( stepMatcher: string | RegExp, stepDefinitionCallback: (...args: any[]) => any) => any;
+export type DefineStepFunction = (
+  stepMatcher: string | RegExp, stepDefinitionCallback: (...args: any[]) => any,
+) => any;
 
 type ScenarioTitleFunction = (scenarioTitle: string, scenario: Scenario, options: Options) => string;
 
@@ -122,7 +124,7 @@ const defineScenario = (
             const stepArgument = nextStep.stepArgument;
             const matches = matchSteps(
                 nextStep.stepText,
-                nextStep.stepMatcher
+                nextStep.stepMatcher,
             );
             let matchArgs: string[] = [];
 
@@ -145,14 +147,16 @@ const defineScenario = (
 };
 
 const createDefineRuleFunction = (
-    feature: Feature
-) => { 
+    feature: Feature,
+) => {
   
     const defineRuleFunction: DefineRuleFunction = (
       ruleTitle: string,
-      provideRuleDefinition: RulesDefinitionCallbackFunction
+      provideRuleDefinition: RulesDefinitionCallbackFunction,
     ) => {
-        const matchingRules = feature.rules.filter((r) => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase());
+        const matchingRules = feature.rules.filter(
+            (r) => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase(),
+        );
 
         if (matchingRules.length === 0) {
             throw new Error(`No rule found in feature that matches "${ruleTitle}"`);
@@ -170,7 +174,13 @@ const createDefineRuleFunction = (
         matchingRule.ruleDefinitionAvailable = true;
 
         describe(ruleTitle, () =>
-            provideRuleDefinition(createDefineScenarioFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
+            provideRuleDefinition(
+                createDefineScenarioFunctionWithAliases(
+                  matchingRule,
+                  createProcessScenarioTitleTemplate(feature),
+                  feature.options,
+                ),
+            ),
         );
 
         const errors = [
@@ -179,17 +189,17 @@ const createDefineRuleFunction = (
                 .map(
                     (s) =>
                         `Scenario "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
-                            s
-                        )}"`
+                            s,
+                        )}"`,
                 ),
             ...matchingRule.scenarioOutlines
                 .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
                 .map(
                     (s) =>
                         `Scenario outline "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
-                            s
-                        )}"`
-                )
+                            s,
+                        )}"`,
+                ),
         ];
 
         if (errors.length > 0) {
