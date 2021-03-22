@@ -254,7 +254,9 @@ const parseAndCollapseBackgrounds = (astFeature: any) => {
                 const rule = nextChild.rule;
                 const ruleBackgrounds = parseBackgrounds(rule);
 
-                rule.children = [...collapseBackgrounds(rule.children, [...featureBackgrounds, ...ruleBackgrounds])]
+                rule.children = [
+                  ...collapseBackgrounds(rule.children, [...featureBackgrounds, ...ruleBackgrounds])
+                ]
             }
 
             return [...newChildren, nextChild];
