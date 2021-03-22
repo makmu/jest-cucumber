@@ -25,10 +25,10 @@ export type DefineScenarioFunction = (
     timeout?: number
 ) => void;
 
-export type RuleDefinitionFunction = (ruleTitle: string, provideRuleDefinition: RulesDefinitionCallbackFunction) => void;
+export type DefineRuleFunction = (ruleTitle: string, provideRuleDefinition: RulesDefinitionCallbackFunction) => void;
 
 export type DefineFeatureFunctions = DefineScenarioFunctionWithAliases & {
-    rule: RuleDefinitionFunction;
+    rule: DefineRuleFunction;
     test: DefineFeatureFunctions;
 };
 
@@ -39,29 +39,23 @@ export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
 };
 
 export type StepsDefinitionCallbackFunction = (options: StepsDefinitionCallbackOptions) => void;
-export type DefineStepFunction = (
-    stepMatcher: string | RegExp,
-    stepDefinitionCallback: (...args: any[]) => any
-) => any;
+export type DefineStepFunction = ( stepMatcher: string | RegExp, stepDefinitionCallback: (...args: any[]) => any) => any;
 
 type TestTitleFunction = (scenarioTitle: string, scenario: Scenario, options: Options) => string;
 
-const createTestTitleFunction = (feature: Feature) => (
+const processScenarioTitleTemplate = (feature: Feature) => (
     scenarioTitle: string,
     scenario: Scenario,
     options: Options,
 ) => {
     if (options && options.scenarioNameTemplate) {
         try {
-            return (
-                options &&
-                options.scenarioNameTemplate({
-                    featureTitle: feature.title,
-                    scenarioTitle: scenarioTitle.toString(),
-                    featureTags: feature.tags,
-                    scenarioTags: scenario.tags
-                })
-            );
+            return options && options.scenarioNameTemplate({
+                featureTitle: feature.title,
+                scenarioTitle: scenarioTitle.toString(),
+                featureTags: feature.tags,
+                scenarioTags: scenario.tags,
+            });
         } catch (err) {
             throw new Error(
                 // tslint:disable-next-line:max-line-length
@@ -171,7 +165,7 @@ const createRuleDefinitionFunction = (feature: Feature) => (
     matchingRule.defined = true;
 
     describe(ruleTitle, () =>
-        provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, createTestTitleFunction(feature), feature.options))
+        provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, processScenarioTitleTemplate(feature), feature.options))
     );
 
     const errors = [
@@ -264,7 +258,7 @@ const createScenarioDefinitionFunction = (
 const createFeatureDefinitionFunctions = (feature: Feature, options: Options): DefineFeatureFunctions => {
     const featureDefinitionFunctions = createScenarioDefinitionFunctionWithAliases(
         feature,
-        createTestTitleFunction(feature),
+        processScenarioTitleTemplate(feature),
         options
     ) as DefineFeatureFunctions;
 
