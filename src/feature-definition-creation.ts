@@ -299,8 +299,8 @@ const createDefineScenarioFunctionWithAliases = (
     processScenarioTitleTemplate: ScenarioTitleFunction,
     options: Options,
 ): DefineScenarioFunctionWithAliases => {
-    const featureDefinitionFunctions = createDefineScenarioFunction(scenarioGroup, processScenarioTitleTemplate, options);
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
+    const defineScenarioFunctionWithAliases = createDefineScenarioFunction(scenarioGroup, processScenarioTitleTemplate, options);
+    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).only = createDefineScenarioFunction(
         scenarioGroup,
         processScenarioTitleTemplate,
         options,
@@ -309,7 +309,7 @@ const createDefineScenarioFunctionWithAliases = (
         false,
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
+    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).skip = createDefineScenarioFunction(
         scenarioGroup,
         processScenarioTitleTemplate,
         options,
@@ -318,7 +318,7 @@ const createDefineScenarioFunctionWithAliases = (
         false,
     );
 
-    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
+    (defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases).concurrent = createDefineScenarioFunction(
         scenarioGroup,
         processScenarioTitleTemplate,
         options,
@@ -327,7 +327,7 @@ const createDefineScenarioFunctionWithAliases = (
         true,
     );
 
-    return featureDefinitionFunctions as DefineScenarioFunctionWithAliases;
+    return defineScenarioFunctionWithAliases as DefineScenarioFunctionWithAliases;
 };
 
 const createDefineStepFunction = (scenarios: Scenario[]) => {
