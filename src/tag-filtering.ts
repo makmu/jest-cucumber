@@ -60,9 +60,9 @@ const checkIfScenarioMatchesTagFilter = (
     return tagFilterFunction(featureAndScenarioTags);
 };
 
-const setScenarioSkipped = (feature: Feature, scenario: Scenario, tagFilter: string) => {
+const setScenarioSkipped = (feature: Feature, scenario: Scenario) => {
     const skippedViaTagFilter = !checkIfScenarioMatchesTagFilter(
-        tagFilter,
+        feature.options.tagFilter!,
         feature,
         scenario,
     );
@@ -75,28 +75,27 @@ const setScenarioSkipped = (feature: Feature, scenario: Scenario, tagFilter: str
 
 export const applyTagFilters = (
     feature: Feature,
-    tagFilter: string | undefined
 ): Feature => {
-    if (tagFilter === undefined) {
+    if (feature.options.tagFilter === undefined) {
         return feature;
     }
 
-    const scenarios = feature.scenarios.map((scenario) => setScenarioSkipped(feature, scenario, tagFilter));
+    const scenarios = feature.scenarios.map((scenario) => setScenarioSkipped(feature, scenario));
     const scenarioOutlines = feature.scenarioOutlines
         .map((scenarioOutline) => {
             return {
-                ...setScenarioSkipped(feature, scenarioOutline, tagFilter),
-                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario, tagFilter)),
+                ...setScenarioSkipped(feature, scenarioOutline),
+                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario)),
             };
         });
     const rules = feature.rules.map((rule) => ({
       ...rule,
-      scenarios: rule.scenarios.map(scenario => setScenarioSkipped(feature, scenario, tagFilter)),
+      scenarios: rule.scenarios.map(scenario => setScenarioSkipped(feature, scenario)),
       scenarioOutlines: rule.scenarioOutlines
         .map((scenarioOutline) => {
             return {
-                ...setScenarioSkipped(feature, scenarioOutline, tagFilter),
-                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario, tagFilter)),
+                ...setScenarioSkipped(feature, scenarioOutline),
+                scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario)),
             };
         })
     }) )
