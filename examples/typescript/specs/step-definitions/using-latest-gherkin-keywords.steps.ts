@@ -41,7 +41,7 @@ defineFeature(feature, (test) => {
             if (!expectedOutput) {
                 expect(output).toBeFalsy();
             } else {
-                expect(output).toBe(expectedOutput === "undefined" ? undefined: parseFloat(expectedOutput));
+                expect(output).toBe(expectedOutput === 'undefined' ? undefined : parseFloat(expectedOutput));
             }
         });
     };

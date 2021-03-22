@@ -49,11 +49,11 @@ const matchAndDefineSteps = (group: Rule | Feature, test: DefineScenarioFunction
                     );
                 } else {
                     const matchingCode = matches.map(
-                        (match) => `${match.stepMatcher.toString()}\n\n${match.stepFunction.toString()}`
+                        (match) => `${match.stepMatcher.toString()}\n\n${match.stepFunction.toString()}`,
                     );
                     errors.push(
                         `${matches.length} step definition matches were found for step "${step.stepText}" in scenario "${scenario.title}" in feature "${group.title}". Each step can only have one matching step definition. The following step definition matches were found:\n\n${matchingCode.join(
-                            '\n\n'
+                            '\n\n',
                         )}`,
                     );
                 }
@@ -70,9 +70,9 @@ export const autoBindSteps = (features: Feature[], stepDefinitions: StepsDefinit
     features.forEach((feature) => {
         defineFeature(feature, ({test, rule}) => {
             matchAndDefineSteps(feature, test, errors);
-            feature.rules.forEach(parsedRule => {
-              rule(parsedRule.title, (test) => {
-                matchAndDefineSteps(parsedRule, test, errors);
+            feature.rules.forEach((parsedRule) => {
+              rule(parsedRule.title, (ruleTest) => {
+                matchAndDefineSteps(parsedRule, ruleTest, errors);
               });
             });
         });

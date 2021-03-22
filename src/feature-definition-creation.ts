@@ -149,7 +149,6 @@ const defineScenario = (
 const createDefineRuleFunction = (
     feature: Feature,
 ) => {
-  
     const defineRuleFunction: DefineRuleFunction = (
       ruleTitle: string,
       provideRuleDefinition: RulesDefinitionCallbackFunction,

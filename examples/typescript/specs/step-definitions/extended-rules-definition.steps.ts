@@ -2,7 +2,10 @@ import { loadFeature, defineFeature} from '../../../../src';
 import { DefineStepFunction } from '../../../../src/feature-definition-creation';
 import { VendingMachine } from '../../src/vending-machine';
 
-const feature = loadFeature('./examples/typescript/specs/features/extended-rules-definition.feature', {collapseRules: false});
+const feature = loadFeature(
+  './examples/typescript/specs/features/extended-rules-definition.feature', {
+    collapseRules: false,
+});
 
 defineFeature(feature, ({rule}) => {
     let vendingMachine: VendingMachine;
@@ -21,7 +24,7 @@ defineFeature(feature, ({rule}) => {
             vendingMachine = new VendingMachine();
             vendingMachine.stockItem(itemName, 0);
         });
-    }
+    };
 
     const givenIHaveInsertedTheCorrectAmountOfMoney = (given: DefineStepFunction) => {
         given('I have inserted the correct amount of money', () => {
@@ -40,16 +43,16 @@ defineFeature(feature, ({rule}) => {
             const inventoryAmount = vendingMachine.items[itemName];
             expect(inventoryAmount).toBe(0);
         });
-    }
+    };
 
     const thenMyMoneyShouldBeReturned = (then: DefineStepFunction) => {
         then(/^my money should be returned$/, () => {
             const returnedMoney = vendingMachine.moneyReturnSlot;
             expect(returnedMoney).toBe(myMoney);
         });
-    }
+    };
 
-    rule("Dispenses items if correct amount of money is inserted", (test) => {
+    rule('Dispenses items if correct amount of money is inserted', (test) => {
 
         test('Selecting a snack', ({ given, when, then }) => {
             givenTheVendingMachineHasXInStock(given);
@@ -66,7 +69,7 @@ defineFeature(feature, ({rule}) => {
         });
     });
 
-    rule("Returns my money if item is out of stock", (test) => {
+    rule('Returns my money if item is out of stock', (test) => {
 
         test('Selecting a snack', ({ given, when, then }) => {
             givenTheVendingMachineHasNoXInStock(given);
