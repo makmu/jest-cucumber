@@ -120,17 +120,22 @@ const defineScenario = (
     testFunction(scenarioTitle, () => {
         return scenario.steps.reduce((promiseChain, nextStep) => {
             const stepArgument = nextStep.stepArgument;
-            const matches = matchSteps(nextStep.stepText, nextStep.stepMatcher);
+            const matches = matchSteps(
+                nextStep.stepText,
+                nextStep.stepMatcher
+            );
             let matchArgs: string[] = [];
 
             if (matches && (matches as RegExpMatchArray).length) {
                 matchArgs = (matches as RegExpMatchArray).slice(1);
             }
 
-            const args = [ ...matchArgs, stepArgument ];
+            const args = [...matchArgs, stepArgument];
 
             return promiseChain.then(() => {
-                return Promise.resolve().then(() => nextStep.stepFunction(...args)).catch((error) => {
+              return Promise.resolve()
+                .then(() => nextStep.stepFunction(...args))
+                .catch((error) => {
                     error.message = `jest-cucumber: ${nextStep.stepText} (line ${nextStep.lineNumber})\n\n${error.message}`;
                     throw error;
                 });
