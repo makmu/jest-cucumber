@@ -1,6 +1,6 @@
 import { checkThatFeatureFileAndStepDefinitionsHaveSameScenarios } from './validation/scenario-validation';
 import { Feature, Scenario, Rule, Options, ScenarioOutline } from './models';
-import { ensureThereAreNoMissingSteps, matchSteps } from './validation/step-definition-validation';
+import { ensureThereAreNoMissingSteps as ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps, matchSteps } from './validation/step-definition-validation';
 import { applyTagFilters } from './tag-filtering';
 import { generateStepCode } from './code-generation/step-generation';
 import { generateScenarioCode } from './code-generation/scenario-generation';
@@ -201,7 +201,7 @@ const createDefineRuleFunction = (
 
 const createDefineScenarioFunction = (
     scenarioGroup: Feature | Rule,
-    buildTestTitle: TestTitleFunction,
+    processScenarioTitleTemplate: TestTitleFunction,
     options: Options,
     only: boolean = false,
     skip: boolean = false,
@@ -211,7 +211,7 @@ const createDefineScenarioFunction = (
     const defineScenarioFunction: DefineScenarioFunction = (
         scenarioTitle: string,
         stepsDefinitionFunctionCallback: StepsDefinitionCallbackFunction,
-        timeout?: number
+        timeout?: number,
     ) => {
         const matchingScenarios = scenarioGroup.scenarios.filter(
             (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
@@ -238,32 +238,35 @@ const createDefineScenarioFunction = (
         scenarios.forEach((s) => (s.stepDefinitionsAvailable = true));
 
         stepsDefinitionFunctionCallback({
-            defineStep: createStepDefinitionFunction(scenarios),
-            given: createStepDefinitionFunction(scenarios),
-            when: createStepDefinitionFunction(scenarios),
-            then: createStepDefinitionFunction(scenarios),
-            and: createStepDefinitionFunction(scenarios),
-            but: createStepDefinitionFunction(scenarios),
+            defineStep: createDefineStepFunction(scenarios),
+            given: createDefineStepFunction(scenarios),
+            when: createDefineStepFunction(scenarios),
+            then: createDefineStepFunction(scenarios),
+            and: createDefineStepFunction(scenarios),
+            but: createDefineStepFunction(scenarios),
             pending: () => {
                 // Nothing to do
-            }
+            },
         });
 
         scenarios.forEach((scenario) => {
-            const testTitle = buildTestTitle(scenarioTitle, scenario, options);
+            const processedScenarioTitle = processScenarioTitleTemplate(
+                scenarioTitle,
+                scenario,
+                options);
 
-            ensureThereAreNoMissingSteps(options, scenario);
+            ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps(options, scenario);
 
             if (checkForPendingSteps(scenario)) {
                 xtest(
-                    testTitle,
+                    processedScenarioTitle,
                     () => {
                         // Nothing to do
                     },
                     undefined
                 );
             } else {
-                defineScenario(testTitle, scenario, only, skip, concurrent, timeout);
+                defineScenario(processedScenarioTitle, scenario, only, skip, concurrent, timeout);
             }
         });
     }
@@ -320,7 +323,7 @@ const createScenarioDefinitionFunctionWithAliases = (
     return featureDefinitionFunctions as DefineScenarioFunctionWithAliases;
 };
 
-const createStepDefinitionFunction = (scenarios: Scenario[]) => {
+const createDefineStepFunction = (scenarios: Scenario[]) => {
     return (stepMatcher: string | RegExp, stepFunction: () => any) => {
         scenarios.forEach((scenario) => {
             const unmatchedSteps = scenario.steps.filter((s) => s.stepMatcher === undefined);
