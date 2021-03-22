@@ -107,7 +107,7 @@ const getTestFunction = (skippedViaTagFilter: boolean, only: boolean, skip: bool
     }
 };
 
-const generateJestTestForScenario = (
+const defineScenario = (
     scenarioTitle: string,
     scenario: Scenario,
     only: boolean = false,
@@ -250,7 +250,7 @@ const createScenarioDefinitionFunction = (
                 undefined
             );
         } else {
-            generateJestTestForScenario(testTitle, scenario, only, skip, concurrent, timeout);
+            defineScenario(testTitle, scenario, only, skip, concurrent, timeout);
         }
     });
 };
