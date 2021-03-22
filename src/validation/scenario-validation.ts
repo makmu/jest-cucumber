@@ -1,10 +1,10 @@
 import {
     Options,
-    Rule,
+    Feature,
 } from '../models';
 
 export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
-    scenarioGroup: Rule,
+    feature: Feature,
     options: Options
 ) => {
 
@@ -12,7 +12,7 @@ export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
       return
     }
 
-    const scenariosWithoutDefinition = scenarioGroup.scenarios.filter(s => !s.stepDefinitionsAvailable);
+    const scenariosWithoutDefinition = feature.scenarios.filter(s => !s.stepDefinitionsAvailable);
 
     const errors = scenariosWithoutDefinition.map(s => 
       `Scenario "${s.title}" found been in feature file but no step definitions were provided`

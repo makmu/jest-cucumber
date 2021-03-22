@@ -379,14 +379,14 @@ export function defineFeature(
 ) {
     const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
 
-    const totalNumberOfRemainingScenarios = 
+    const totalNumberOfFilteredScenarios = 
       parsedFeatureWithTagFiltersApplied.scenarios.length
       + parsedFeatureWithTagFiltersApplied.scenarioOutlines.length
       + parsedFeatureWithTagFiltersApplied.rules
           .map(r => r.scenarios.length + r.scenarioOutlines.length)
           .reduce((previousCount, currentCount) => previousCount + currentCount, 0);
     if (
-      totalNumberOfRemainingScenarios === 0 
+      totalNumberOfFilteredScenarios === 0 
     ) {
         return;
     }
