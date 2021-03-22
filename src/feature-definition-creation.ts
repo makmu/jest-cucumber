@@ -199,61 +199,70 @@ const createDefineScenarioFunction = (
     options: Options,
     only: boolean = false,
     skip: boolean = false,
-    concurrent: boolean = false
-) => (scenarioTitle: string, stepsDefinitionFunctionCallback: StepsDefinitionCallbackFunction, timeout?: number) => {
-    const matchingScenarios = scenarioGroup.scenarios.filter(
-        (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
-    );
-    const matchingScenarioOutlines = scenarioGroup.scenarioOutlines.filter(
-        (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
-    );
+    concurrent: boolean = false,
+) => {
 
-    let scenarios: Scenario[] = [];
-    if (matchingScenarios.length === 0 && matchingScenarioOutlines.length === 0) {
-        throw new Error(`No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`);
-    }
-    if (matchingScenarios.length + matchingScenarioOutlines.length > 1) {
-        throw new Error(`More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`);
-    }
+    const defineScenarioFunction: DefineScenarioFunction = (
+        scenarioTitle: string,
+        stepsDefinitionFunctionCallback: StepsDefinitionCallbackFunction,
+        timeout?: number
+    ) => {
+        const matchingScenarios = scenarioGroup.scenarios.filter(
+            (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
+        );
+        const matchingScenarioOutlines = scenarioGroup.scenarioOutlines.filter(
+            (s) => s.title.toLocaleLowerCase() === scenarioTitle.toLocaleLowerCase()
+        );
 
-    if (matchingScenarios.length === 1) {
-        scenarios = [ matchingScenarios[0] ];
-    } else {
-        matchingScenarioOutlines[0].stepDefinitionsAvailable = true;
-        scenarios = matchingScenarioOutlines[0].scenarios;
-    }
-
-    scenarios.forEach((s) => (s.stepDefinitionsAvailable = true));
-
-    stepsDefinitionFunctionCallback({
-        defineStep: createStepDefinitionFunction(scenarios),
-        given: createStepDefinitionFunction(scenarios),
-        when: createStepDefinitionFunction(scenarios),
-        then: createStepDefinitionFunction(scenarios),
-        and: createStepDefinitionFunction(scenarios),
-        but: createStepDefinitionFunction(scenarios),
-        pending: () => {
-            // Nothing to do
+        let scenarios: Scenario[] = [];
+        if (matchingScenarios.length === 0 && matchingScenarioOutlines.length === 0) {
+            throw new Error(`No scenarios found in feature/rule that match scenario title "${scenarioTitle}."`);
         }
-    });
+        if (matchingScenarios.length + matchingScenarioOutlines.length > 1) {
+            throw new Error(`More than one scenario found in feature/rule that match scenario title "${scenarioTitle}"`);
+        }
 
-    scenarios.forEach((scenario) => {
-        const testTitle = buildTestTitle(scenarioTitle, scenario, options);
-
-        ensureThereAreNoMissingSteps(options, scenario);
-
-        if (checkForPendingSteps(scenario)) {
-            xtest(
-                testTitle,
-                () => {
-                    // Nothing to do
-                },
-                undefined
-            );
+        if (matchingScenarios.length === 1) {
+            scenarios = [ matchingScenarios[0] ];
         } else {
-            defineScenario(testTitle, scenario, only, skip, concurrent, timeout);
+            matchingScenarioOutlines[0].stepDefinitionsAvailable = true;
+            scenarios = matchingScenarioOutlines[0].scenarios;
         }
-    });
+
+        scenarios.forEach((s) => (s.stepDefinitionsAvailable = true));
+
+        stepsDefinitionFunctionCallback({
+            defineStep: createStepDefinitionFunction(scenarios),
+            given: createStepDefinitionFunction(scenarios),
+            when: createStepDefinitionFunction(scenarios),
+            then: createStepDefinitionFunction(scenarios),
+            and: createStepDefinitionFunction(scenarios),
+            but: createStepDefinitionFunction(scenarios),
+            pending: () => {
+                // Nothing to do
+            }
+        });
+
+        scenarios.forEach((scenario) => {
+            const testTitle = buildTestTitle(scenarioTitle, scenario, options);
+
+            ensureThereAreNoMissingSteps(options, scenario);
+
+            if (checkForPendingSteps(scenario)) {
+                xtest(
+                    testTitle,
+                    () => {
+                        // Nothing to do
+                    },
+                    undefined
+                );
+            } else {
+                defineScenario(testTitle, scenario, only, skip, concurrent, timeout);
+            }
+        });
+    }
+
+    return defineScenarioFunction;
 };
 
 const createFeatureDefinitionFunctions = (feature: Feature, options: Options): DefineFeatureFunctions => {
