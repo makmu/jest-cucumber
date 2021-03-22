@@ -144,54 +144,60 @@ const defineScenario = (
     }, timeout);
 };
 
-const createDefineRuleFunction = (feature: Feature) => (
-    ruleTitle: string,
-    provideRuleDefinition: RulesDefinitionCallbackFunction
-) => {
-    const matchingRules = feature.rules.filter((r) => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase());
+const createDefineRuleFunction = (
+    feature: Feature
+) => { 
+  
+    const defineRuleFunction: DefineRuleFunction = (
+      ruleTitle: string,
+      provideRuleDefinition: RulesDefinitionCallbackFunction
+    ) => {
+        const matchingRules = feature.rules.filter((r) => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase());
 
-    if (matchingRules.length === 0) {
-        throw new Error(`No rule found in feature that matches "${ruleTitle}"`);
-    }
+        if (matchingRules.length === 0) {
+            throw new Error(`No rule found in feature that matches "${ruleTitle}"`);
+        }
 
-    if (matchingRules.length > 1) {
-        throw new Error(`More than one rule found in feature that maches "${ruleTitle}"`);
-    }
+        if (matchingRules.length > 1) {
+            throw new Error(`More than one rule found in feature that maches "${ruleTitle}"`);
+        }
 
-    const matchingRule = matchingRules[0];
-    if (matchingRule.defined) {
-        throw new Error(`Rule "${ruleTitle} defined multiple times`);
-    }
+        const matchingRule = matchingRules[0];
+        if (matchingRule.defined) {
+            throw new Error(`Rule "${ruleTitle} defined multiple times`);
+        }
 
-    matchingRule.defined = true;
+        matchingRule.defined = true;
 
-    describe(ruleTitle, () =>
-        provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
-    );
+        describe(ruleTitle, () =>
+            provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
+        );
 
-    const errors = [
-        ...matchingRule.scenarios
-            .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
-            .map(
-                (s) =>
-                    `Scenario "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
-                        s
-                    )}"`
-            ),
-        ...matchingRule.scenarioOutlines
-            .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
-            .map(
-                (s) =>
-                    `Scenario outline "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
-                        s
-                    )}"`
-            )
-    ];
+        const errors = [
+            ...matchingRule.scenarios
+                .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
+                .map(
+                    (s) =>
+                        `Scenario "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
+                            s
+                        )}"`
+                ),
+            ...matchingRule.scenarioOutlines
+                .filter((s) => !s.stepDefinitionsAvailable && !s.skippedViaTagFilter)
+                .map(
+                    (s) =>
+                        `Scenario outline "${s.title}" defined in feature file but no step definitions provided. Try adding the following code:\n\n${generateScenarioCode(
+                            s
+                        )}"`
+                )
+        ];
 
-    if (errors.length > 0) {
-        throw new Error(errors.join('\n\n'));
-    }
-};
+      if (errors.length > 0) {
+          throw new Error(errors.join('\n\n'));
+      }
+    };
+    return defineRuleFunction;
+}
 
 const createDefineScenarioFunction = (
     scenarioGroup: Feature | Rule,
