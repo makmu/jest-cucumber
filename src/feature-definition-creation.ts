@@ -377,7 +377,7 @@ export function defineFeature(
     featureFromFile: Feature,
     featureDefinitionCallback: FeatureDefinitionCallbackFunction,
 ) {
-    const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
+    const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile);
 
     const totalNumberOfFilteredScenarios = 
       parsedFeatureWithTagFiltersApplied.scenarios.length
@@ -386,19 +386,19 @@ export function defineFeature(
           .map(r => r.scenarios.length + r.scenarioOutlines.length)
           .reduce((previousCount, currentCount) => previousCount + currentCount, 0);
     if (
-      totalNumberOfFilteredScenarios === 0 
+      totalNumberOfFilteredScenarios === 0
     ) {
         return;
     }
 
     describe(featureFromFile.title, () => {
         featureDefinitionCallback(
-            createDefineFeatureFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
+            createDefineFeatureFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options),
         );
 
         checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
             parsedFeatureWithTagFiltersApplied,
-            featureFromFile.options
+            featureFromFile.options,
         );
     });
 }

@@ -92,7 +92,7 @@ const parseRule = (astRule: any) => {
       scenarioOutlines: parseScenarioOutlines(astRule),
       tags: parseTags(astRule),
     } as Rule;
-}
+};
 
 const parseScenarioOutlineExampleSteps = (exampleTableRow: any, scenarioSteps: Step[]) => {
     return scenarioSteps.map((scenarioStep) => {
@@ -255,8 +255,8 @@ const parseAndCollapseBackgrounds = (astFeature: any) => {
                 const ruleBackgrounds = parseBackgrounds(rule);
 
                 rule.children = [
-                  ...collapseBackgrounds(rule.children, [...featureBackgrounds, ...ruleBackgrounds])
-                ]
+                  ...collapseBackgrounds(rule.children, [...featureBackgrounds, ...ruleBackgrounds]),
+                ];
             }
 
             return [...newChildren, nextChild];
@@ -269,19 +269,18 @@ const parseAndCollapseBackgrounds = (astFeature: any) => {
 };
 
 const collapseRules = (astFeature: any) => {
-    const children = astFeature.children.reduce((newChildren: [], nextChild:any) => {
-      if(nextChild.rule) {
+    const children = astFeature.children.reduce((newChildren: [], nextChild: any) => {
+      if (nextChild.rule) {
         return [...newChildren, ...nextChild.rule.children];
-      }
-      else {
+      } else {
         return [...newChildren, nextChild];
       }
-    }, [])
+    }, []);
     return {
       ...astFeature,
       children,
-    }
-}
+    };
+};
 
 const translateKeywords = (astFeature: any) => {
     const languageDialect = dialects[astFeature.language];
@@ -373,7 +372,7 @@ export const parseFeature = (featureText: string, options?: Options): Feature =>
 
     let astFeature = parseAndCollapseBackgrounds(ast.feature);
 
-    if(options?.collapseRules) {
+    if (options?.collapseRules) {
         astFeature = collapseRules(astFeature);
     }
 

@@ -32,7 +32,7 @@ export type Rule = {
     scenarioOutlines: ScenarioOutline[];
     ruleDefinitionAvailable: boolean;
     tags: string[];
-}
+};
 
 export type Feature = {
     title: string;

@@ -90,15 +90,15 @@ export const applyTagFilters = (
         });
     const rules = feature.rules.map((rule) => ({
       ...rule,
-      scenarios: rule.scenarios.map(scenario => setScenarioSkipped(feature, scenario)),
+      scenarios: rule.scenarios.map((scenario) => setScenarioSkipped(feature, scenario)),
       scenarioOutlines: rule.scenarioOutlines
         .map((scenarioOutline) => {
             return {
                 ...setScenarioSkipped(feature, scenarioOutline),
                 scenarios: scenarioOutline.scenarios.map((scenario) => setScenarioSkipped(feature, scenario)),
             };
-        })
-    }) )
+        }),
+    }));
 
     return {
         ...feature,
