@@ -375,20 +375,24 @@ const createDefineStepFunction = (scenarios: Scenario[]) => {
 
 export function defineFeature(
     featureFromFile: Feature,
-    scenariosDefinitionCallback: FeatureDefinitionCallbackFunction,
+    featureDefinitionCallback: FeatureDefinitionCallbackFunction,
 ) {
+    const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
+
+    const totalNumberOfRemainingScenarios = 
+      parsedFeatureWithTagFiltersApplied.scenarios.length
+      + parsedFeatureWithTagFiltersApplied.scenarioOutlines.length
+      + parsedFeatureWithTagFiltersApplied.rules
+          .map(r => r.scenarios.length + r.scenarioOutlines.length)
+          .reduce((previousCount, currentCount) => previousCount + currentCount, 0);
+    if (
+      totalNumberOfRemainingScenarios === 0 
+    ) {
+        return;
+    }
+
     describe(featureFromFile.title, () => {
-        const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
-
-        if (
-            parsedFeatureWithTagFiltersApplied.scenarios.length === 0 &&
-            parsedFeatureWithTagFiltersApplied.scenarioOutlines.length === 0 &&
-            parsedFeatureWithTagFiltersApplied.rules.length === 0
-        ) {
-            return;
-        }
-
-        scenariosDefinitionCallback(
+        featureDefinitionCallback(
             createDefineFeatureFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
         );
 
