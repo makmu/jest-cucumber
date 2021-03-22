@@ -5,7 +5,7 @@ import {
 
 export const checkThatFeatureFileAndStepDefinitionsHaveSameScenarios = (
     feature: Feature,
-    options: Options
+    options: Options,
 ) => {
 
     if(options && options.errors === false) {
