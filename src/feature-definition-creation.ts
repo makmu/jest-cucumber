@@ -170,7 +170,7 @@ const createDefineRuleFunction = (
         matchingRule.defined = true;
 
         describe(ruleTitle, () =>
-            provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
+            provideRuleDefinition(createDefineScenarioFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
         );
 
         const errors = [
@@ -266,7 +266,14 @@ const createDefineScenarioFunction = (
                     undefined
                 );
             } else {
-                defineScenario(processedScenarioTitle, scenario, only, skip, concurrent, timeout);
+                defineScenario(
+                    processedScenarioTitle,
+                    scenario,
+                    only,
+                    skip,
+                    concurrent,
+                    timeout,
+                );
             }
         });
     }
@@ -274,8 +281,8 @@ const createDefineScenarioFunction = (
     return defineScenarioFunction;
 };
 
-const createFeatureDefinitionFunctions = (feature: Feature, options: Options): DefineFeatureFunctions => {
-    const featureDefinitionFunctions = createScenarioDefinitionFunctionWithAliases(
+const createDefineFeatureFunctions = (feature: Feature, options: Options): DefineFeatureFunctions => {
+    const featureDefinitionFunctions = createDefineScenarioFunctionWithAliases(
         feature,
         createProcessScenarioTitleTemplate(feature),
         options
@@ -287,7 +294,7 @@ const createFeatureDefinitionFunctions = (feature: Feature, options: Options): D
     return featureDefinitionFunctions;
 };
 
-const createScenarioDefinitionFunctionWithAliases = (
+const createDefineScenarioFunctionWithAliases = (
     scenarioGroup: Feature | Rule,
     buildTestTitle: TestTitleFunction,
     options: Options
@@ -379,7 +386,7 @@ export function defineFeature(featureFromFile: Feature, provideFeatureDefinition
         }
 
         provideFeatureDefinition(
-            createFeatureDefinitionFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
+            createDefineFeatureFunctions(parsedFeatureWithTagFiltersApplied, featureFromFile.options)
         );
 
         checkThatFeatureFileAndStepDefinitionsHaveSameScenarios(
