@@ -75,7 +75,7 @@ const setScenarioSkipped = (feature: Feature, scenario: Scenario) => {
 
 export const applyTagFilters = (
     feature: Feature,
-): Feature => {
+) => {
     if (feature.options.tagFilter === undefined) {
         return feature;
     }
