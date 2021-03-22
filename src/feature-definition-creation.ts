@@ -43,7 +43,7 @@ export type DefineStepFunction = ( stepMatcher: string | RegExp, stepDefinitionC
 
 type TestTitleFunction = (scenarioTitle: string, scenario: Scenario, options: Options) => string;
 
-const processScenarioTitleTemplate = (feature: Feature) => (
+const createProcessScenarioTitleTemplate = (feature: Feature) => (
     scenarioTitle: string,
     scenario: Scenario,
     options: Options,
@@ -165,7 +165,7 @@ const createRuleDefinitionFunction = (feature: Feature) => (
     matchingRule.defined = true;
 
     describe(ruleTitle, () =>
-        provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, processScenarioTitleTemplate(feature), feature.options))
+        provideRuleDefinition(createScenarioDefinitionFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
     );
 
     const errors = [
@@ -258,7 +258,7 @@ const createScenarioDefinitionFunction = (
 const createFeatureDefinitionFunctions = (feature: Feature, options: Options): DefineFeatureFunctions => {
     const featureDefinitionFunctions = createScenarioDefinitionFunctionWithAliases(
         feature,
-        processScenarioTitleTemplate(feature),
+        createProcessScenarioTitleTemplate(feature),
         options
     ) as DefineFeatureFunctions;
 
