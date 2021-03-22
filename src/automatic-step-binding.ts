@@ -3,7 +3,7 @@ import { matchSteps } from './validation/step-definition-validation';
 import {
     StepsDefinitionCallbackFunction,
     defineFeature,
-    ScenarioDefinitionFunctionWithAliases,
+    DefineScenarioFunctionWithAliases,
 } from './feature-definition-creation';
 import { generateStepCode } from './code-generation/step-generation';
 
@@ -27,7 +27,7 @@ const registerSteps = (stepDefinitionCallback: StepsDefinitionCallbackFunction) 
     });
 };
 
-const matchAndDefineSteps = (group: Rule, test: ScenarioDefinitionFunctionWithAliases, errors: string[]) => {
+const matchAndDefineSteps = (group: Rule, test: DefineScenarioFunctionWithAliases, errors: string[]) => {
     const scenarioOutlineScenarios = group.scenarioOutlines.map((scenarioOutline) => scenarioOutline.scenarios[0]);
 
     const scenarios = [ ...group.scenarios, ...scenarioOutlineScenarios ];

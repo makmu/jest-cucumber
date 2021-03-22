@@ -15,9 +15,9 @@ export type StepsDefinitionCallbackOptions = {
     pending: () => void;
 };
 
-export type FeatureDefinitionCallback = (defineScenario: FeatureDefinitionFunctions) => void;
+export type FeatureDefinitionCallbackFunction = (defineScenrioOrRule: DefineFeatureFunctions) => void;
 
-export type RuleDefinitionCallback = (defineScenario: ScenarioDefinitionFunctionWithAliases) => void;
+export type RulesDefinitionCallbackFunction = (defineScenario: DefineScenarioFunctionWithAliases) => void;
 
 export type DefineScenarioFunction = (
     scenarioTitle: string,
@@ -25,14 +25,14 @@ export type DefineScenarioFunction = (
     timeout?: number
 ) => void;
 
-export type RuleDefinitionFunction = (ruleTitle: string, provideRuleDefinition: RuleDefinitionCallback) => void;
+export type RuleDefinitionFunction = (ruleTitle: string, provideRuleDefinition: RulesDefinitionCallbackFunction) => void;
 
-export type FeatureDefinitionFunctions = ScenarioDefinitionFunctionWithAliases & {
+export type DefineFeatureFunctions = DefineScenarioFunctionWithAliases & {
     rule: RuleDefinitionFunction;
-    test: FeatureDefinitionFunctions;
+    test: DefineFeatureFunctions;
 };
 
-export type ScenarioDefinitionFunctionWithAliases = DefineScenarioFunction & {
+export type DefineScenarioFunctionWithAliases = DefineScenarioFunction & {
     skip: DefineScenarioFunction;
     only: DefineScenarioFunction;
     concurrent: DefineScenarioFunction;
@@ -151,7 +151,7 @@ const generateJestTestForScenario = (
 
 const createRuleDefinitionFunction = (feature: Feature) => (
     ruleTitle: string,
-    provideRuleDefinition: RuleDefinitionCallback
+    provideRuleDefinition: RulesDefinitionCallbackFunction
 ) => {
     const matchingRules = feature.rules.filter((r) => r.title.toLocaleLowerCase() === ruleTitle.toLocaleLowerCase());
 
@@ -261,12 +261,12 @@ const createScenarioDefinitionFunction = (
     });
 };
 
-const createFeatureDefinitionFunctions = (feature: Feature, options: Options): FeatureDefinitionFunctions => {
+const createFeatureDefinitionFunctions = (feature: Feature, options: Options): DefineFeatureFunctions => {
     const featureDefinitionFunctions = createScenarioDefinitionFunctionWithAliases(
         feature,
         createTestTitleFunction(feature),
         options
-    ) as FeatureDefinitionFunctions;
+    ) as DefineFeatureFunctions;
 
     featureDefinitionFunctions.rule = createRuleDefinitionFunction(feature);
     featureDefinitionFunctions.test = featureDefinitionFunctions;
@@ -278,9 +278,9 @@ const createScenarioDefinitionFunctionWithAliases = (
     scenarioGroup: Feature | Rule,
     buildTestTitle: TestTitleFunction,
     options: Options
-): ScenarioDefinitionFunctionWithAliases => {
+): DefineScenarioFunctionWithAliases => {
     const featureDefinitionFunctions = createScenarioDefinitionFunction(scenarioGroup, buildTestTitle, options);
-    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).only = createScenarioDefinitionFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).only = createScenarioDefinitionFunction(
         scenarioGroup,
         buildTestTitle,
         options,
@@ -289,7 +289,7 @@ const createScenarioDefinitionFunctionWithAliases = (
         false
     );
 
-    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).skip = createScenarioDefinitionFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).skip = createScenarioDefinitionFunction(
         scenarioGroup,
         buildTestTitle,
         options,
@@ -298,7 +298,7 @@ const createScenarioDefinitionFunctionWithAliases = (
         false
     );
 
-    (featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases).concurrent = createScenarioDefinitionFunction(
+    (featureDefinitionFunctions as DefineScenarioFunctionWithAliases).concurrent = createScenarioDefinitionFunction(
         scenarioGroup,
         buildTestTitle,
         options,
@@ -307,7 +307,7 @@ const createScenarioDefinitionFunctionWithAliases = (
         true
     );
 
-    return featureDefinitionFunctions as ScenarioDefinitionFunctionWithAliases;
+    return featureDefinitionFunctions as DefineScenarioFunctionWithAliases;
 };
 
 const createStepDefinitionFunction = (scenarios: Scenario[]) => {
@@ -353,7 +353,7 @@ const createStepDefinitionFunction = (scenarios: Scenario[]) => {
     };
 };
 
-export function defineFeature(featureFromFile: Feature, provideFeatureDefinition: FeatureDefinitionCallback) {
+export function defineFeature(featureFromFile: Feature, provideFeatureDefinition: FeatureDefinitionCallbackFunction) {
     describe(featureFromFile.title, () => {
         const parsedFeatureWithTagFiltersApplied = applyTagFilters(featureFromFile, featureFromFile.options.tagFilter);
 
