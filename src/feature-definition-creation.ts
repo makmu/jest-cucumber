@@ -163,11 +163,11 @@ const createDefineRuleFunction = (
         }
 
         const matchingRule = matchingRules[0];
-        if (matchingRule.defined) {
+        if (matchingRule.ruleDefinitionAvailable) {
             throw new Error(`Rule "${ruleTitle} defined multiple times`);
         }
 
-        matchingRule.defined = true;
+        matchingRule.ruleDefinitionAvailable = true;
 
         describe(ruleTitle, () =>
             provideRuleDefinition(createDefineScenarioFunctionWithAliases(matchingRule, createProcessScenarioTitleTemplate(feature), feature.options))
