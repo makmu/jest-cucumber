@@ -6,12 +6,12 @@ import { generateStepCode } from './code-generation/step-generation';
 import { generateScenarioCode } from './code-generation/scenario-generation';
 
 export type StepsDefinitionCallbackOptions = {
-    defineStep: StepDefinitionFunction;
-    given: StepDefinitionFunction;
-    when: StepDefinitionFunction;
-    then: StepDefinitionFunction;
-    and: StepDefinitionFunction;
-    but: StepDefinitionFunction;
+    defineStep: DefineStepFunction;
+    given: DefineStepFunction;
+    when: DefineStepFunction;
+    then: DefineStepFunction;
+    and: DefineStepFunction;
+    but: DefineStepFunction;
     pending: () => void;
 };
 
@@ -39,7 +39,7 @@ export type ScenarioDefinitionFunctionWithAliases = DefineScenarioFunction & {
 };
 
 export type StepsDefinitionCallbackFunction = (options: StepsDefinitionCallbackOptions) => void;
-export type StepDefinitionFunction = (
+export type DefineStepFunction = (
     stepMatcher: string | RegExp,
     stepDefinitionCallback: (...args: any[]) => any
 ) => any;

@@ -3,7 +3,6 @@ import { matchSteps } from './validation/step-definition-validation';
 import {
     StepsDefinitionCallbackFunction,
     defineFeature,
-    FeatureDefinitionFunctions,
     ScenarioDefinitionFunctionWithAliases,
 } from './feature-definition-creation';
 import { generateStepCode } from './code-generation/step-generation';
